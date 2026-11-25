@@ -1,0 +1,87 @@
+{
+  "consulta_id": "C1",
+  "estado": "ok",
+  "funcion": "evidence.explain_profile",
+  "parametros": {
+    "perfil": {
+      "estrategia": "r.Reca champ",
+      "segmento_estrategia": "Costco",
+      "producto": "Costco",
+      "canal": "Costco",
+      "rango_edad": "02| Young 25-30",
+      "rango_score": "141-150"
+    }
+  },
+  "cifras": {
+    "tasa_s3": 0.087,
+    "nivel_riesgo": "Alto",
+    "confianza": "Media",
+    "cuentas_maduras_similares": 640,
+    "linea_promedio_s1": 28500.0,
+    "horizonte_meses": 6
+  },
+  "tablas": [
+    {
+      "nombre": "contribuciones_principales",
+      "columnas": [
+        "variable",
+        "valor",
+        "direccion",
+        "contribucion_logit"
+      ],
+      "filas": [
+        [
+          "rango_score",
+          "141-150",
+          "sube",
+          0.42
+        ],
+        [
+          "rango_edad",
+          "02| Young 25-30",
+          "sube",
+          0.18
+        ],
+        [
+          "canal",
+          "Costco",
+          "sube",
+          0.07
+        ],
+        [
+          "producto",
+          "Costco",
+          "baja",
+          -0.11
+        ],
+        [
+          "mes_booking",
+          "6",
+          "baja",
+          -0.05
+        ],
+        [
+          "segmento_estrategia",
+          "Costco",
+          "baja",
+          -0.03
+        ]
+      ]
+    }
+  ],
+  "frases_base": [
+    "La tasa de impago estimada a 6 meses para este perfil es 8.7%, nivel de riesgo Alto.",
+    "Los factores que más suben la tasa estimada son: rango de score, rango de edad y canal.",
+    "Los factores que más la bajan son: producto, mes de booking y segmento de estrategia.",
+    "Estas explicaciones describen cómo usa las variables el modelo; no establecen relaciones causales."
+  ],
+  "fragmentos": [],
+  "versiones": {
+    "modelo_s1": "s1/simulado",
+    "modelo_s3": "s3/simulado",
+    "datos_sha256": "simulado",
+    "horizonte_mob": 6
+  },
+  "motivo": null,
+  "simulado": true
+}

@@ -1,0 +1,20 @@
+{
+  "consulta_id": "C3",
+  "estado": "sin_evidencia",
+  "funcion": "evidence.compare_groups",
+  "parametros": {
+    "dimension": "producto",
+    "valor_a": "Teleton",
+    "valor_b": "Beyond"
+  },
+  "cifras": {},
+  "tablas": [],
+  "frases_base": [],
+  "fragmentos": [],
+  "versiones": {
+    "datos_sha256": "simulado",
+    "horizonte_mob": 6
+  },
+  "motivo": "No hay cohortes maduras a 6 meses con cuentas expuestas para alguno de los dos grupos.",
+  "simulado": true
+}
