@@ -3,18 +3,27 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+data/chroma/
 
-# Modelos: binarios fuera; metadatos .json sí se suben
+# Salidas generadas y pruebas personales (se conserva solo la carpeta)
+reports/*
+!reports/.gitkeep
+scratch/*
+!scratch/.gitkeep
+
+# Modelos: solo se versionan metadata.json y actual.json
 models/**
 !models/**/
-!models/**/*.json
+!models/**/metadata.json
+!models/**/actual.json
 !models/.gitkeep
+models/**/modelo.*
+
+# Configuración personal de Claude Code (la compartida es .claude/settings.json)
+.claude/settings.local.json
 
 # Entorno y cachés de Python
 .venv/
 __pycache__/
 *.pyc
 .pytest_cache/
-
-# Jupyter
-.ipynb_checkpoints/
