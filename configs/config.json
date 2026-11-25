@@ -12,6 +12,20 @@
     "raw_data": "data/raw/base_cards_sintetica.csv",
     "dictionary": "data/contracts/diccionario_variables.csv",
     "processed_dir": "data/processed",
-    "models_dir": "models"
+    "models_dir": "models",
+    "contracts_dir": "data/contracts",
+    "mock_dir": "data/mock",
+    "knowledge_dir": "data/knowledge",
+    "eval_dir": "data/eval",
+    "chroma_dir": "data/chroma",
+    "reports_dir": "reports",
+    "scratch_dir": "scratch",
+    "scripts_dir": "scripts"
+  },
+  "evidence_mode": "mock",
+  "ollama": {
+    "host": "http://localhost:11434",
+    "model": "llama3.1:8b",
+    "timeout_seconds": 60
   }
 }
