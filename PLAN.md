@@ -11,7 +11,7 @@
 | Fase | Qué se hace | Quién | Estado |
 |---|---|---|---|
 | 0. Preparación | Repo, entorno, configuración base | L | ✅ |
-| **0b. Reestructura** | Scripts en vez de notebooks, README completo, bloqueo técnico de git, contratos y ejemplos simulados | L | ⬜ **siguiente** |
+| **0b. Reestructura** | Scripts en vez de notebooks, README completo, bloqueo técnico de git, contratos y ejemplos simulados | L | ✅ |
 | 1. Datos | Cargar, validar y entender el dataset | L | ⬜ |
 | 2. Modelos S1, S2 y S3 | Líneas base y XGBoost, métricas, versionado | L | ⬜ |
 | 3. Estrategia, consistencia y SHAP | S4, reglas de consistencia, explicabilidad en tres niveles | L | ⬜ |
@@ -115,22 +115,22 @@ Entrada: pregunta en texto y, si aplica, perfil o lote en sesión. Salida: respu
 
 ---
 
-## Fase 0b — Reestructura `[L]`
+## Fase 0b — Reestructura `[L]` ✅
 
 **Alcance:** solo infraestructura y contratos. No cargues ni analices datos todavía. Trabaja en la rama `luis/fase-0b-reestructura`; el merge a `main` lo hago yo (Ernesto necesita los contratos y los ejemplos).
 
-- [ ] **De notebooks a scripts.** Con `git mv`, reemplaza `notebooks/` por `scripts/` con las subcarpetas: `01_datos`, `02_modelos_prediccion`, `03_estrategia_y_explicabilidad`, `04_app_api`, `05a_evidencia_rag`, `05b_asistente`, `06_cierre`. En el repo no debe quedar ningún archivo `.ipynb`, y el `README.md` y `docs/` no deben mencionar notebooks.
-- [ ] **Carpetas nuevas** (con `.gitkeep`): `reports/`, `data/mock/`, `data/knowledge/`, `data/eval/`, `scratch/`, `docs/contratos/`, `src/strategy/`, `src/evidence/`, `src/rag/`.
-- [ ] **`.gitignore`:** agrega `reports/`, `scratch/`, `data/chroma/`, `.claude/settings.local.json`; en `models/` ignora `models/**/modelo.*` pero **sí** versiona `metadata.json` y `actual.json`. Verifica con `git status` y `git check-ignore -v`.
-- [ ] **`scripts/_plantilla.py`:** plantilla con el docstring estándar, el encabezado para importar `src`, secciones numeradas, `main()`, gráficas en funciones aparte y `argparse` con `--sin-graficas` (ver `CLAUDE.md` §9).
-- [ ] **`scripts/run_fase.py`:** `python scripts/run_fase.py 1` corre en orden los scripts de la fase; se detiene en el primer error e imprime un resumen. Opción `--desde NN` para continuar desde un script.
-- [ ] **`configs/config.json`:** agrega las carpetas nuevas, `evidence_mode` (`"mock"`), `ollama` (servidor local, modelo `llama3.1:8b`, tiempo máximo de espera) y la ruta de Chroma.
-- [ ] **Bloqueo técnico de git en `.claude/settings.json`** (se versiona, para que aplique también en la máquina de Ernesto): reglas de denegación para `git reset --hard`, `git push --force`, `git push -f`, `git push --force-with-lease` (con el flag antes y después de los argumentos) y `git clean -fd`. Usa la sintaxis de permisos que acepte la versión de Claude Code instalada y **compruébalo** (por ejemplo con `/permissions`). Dime qué variantes quedaron cubiertas y cuáles no.
-- [ ] **`docs/contratos/evidencia.md`:** catálogo C1–C7 y formato del paquete de evidencia, tal como están en este archivo, con la descripción de cada campo y un ejemplo completo por consulta.
-- [ ] **`docs/contratos/chat.md`:** entrada y salida del servicio de chat (campos, estados, ejemplo).
-- [ ] **Ejemplos simulados en `data/mock/`:** `evidencia_c1.json` … `evidencia_c7.json`, más uno con `estado = "no_evaluable"` y otro con `estado = "sin_evidencia"`. Las cifras son inventadas a propósito y llevan una marca `"simulado": true`.
-- [ ] **`src/evidence/`:** función `get_evidence(consulta_id, **params)` que, con `evidence_mode = "mock"`, devuelve el ejemplo correspondiente; con `"real"` lanza `NotImplementedError` con un mensaje claro. Pruebas en `tests/` que validan que cada ejemplo cumple el contrato.
-- [ ] **`README.md` completo** con estas secciones:
+- [x] **De notebooks a scripts.** Con `git mv`, reemplaza `notebooks/` por `scripts/` con las subcarpetas: `01_datos`, `02_modelos_prediccion`, `03_estrategia_y_explicabilidad`, `04_app_api`, `05a_evidencia_rag`, `05b_asistente`, `06_cierre`. En el repo no debe quedar ningún archivo `.ipynb`, y el `README.md` y `docs/` no deben mencionar notebooks.
+- [x] **Carpetas nuevas** (con `.gitkeep`): `reports/`, `data/mock/`, `data/knowledge/`, `data/eval/`, `scratch/`, `docs/contratos/`, `src/strategy/`, `src/evidence/`, `src/rag/`.
+- [x] **`.gitignore`:** agrega `reports/`, `scratch/`, `data/chroma/`, `.claude/settings.local.json`; en `models/` ignora `models/**/modelo.*` pero **sí** versiona `metadata.json` y `actual.json`. Verifica con `git status` y `git check-ignore -v`.
+- [x] **`scripts/_plantilla.py`:** plantilla con el docstring estándar, el encabezado para importar `src`, secciones numeradas, `main()`, gráficas en funciones aparte y `argparse` con `--sin-graficas` (ver `CLAUDE.md` §9).
+- [x] **`scripts/run_fase.py`:** `python scripts/run_fase.py 1` corre en orden los scripts de la fase; se detiene en el primer error e imprime un resumen. Opción `--desde NN` para continuar desde un script.
+- [x] **`configs/config.json`:** agrega las carpetas nuevas, `evidence_mode` (`"mock"`), `ollama` (servidor local, modelo `llama3.1:8b`, tiempo máximo de espera) y la ruta de Chroma.
+- [x] **Bloqueo técnico de git en `.claude/settings.json`** (se versiona, para que aplique también en la máquina de Ernesto): reglas de denegación para `git reset --hard`, `git push --force`, `git push -f`, `git push --force-with-lease` (con el flag antes y después de los argumentos) y `git clean -fd`. Usa la sintaxis de permisos que acepte la versión de Claude Code instalada y **compruébalo** (por ejemplo con `/permissions`). Dime qué variantes quedaron cubiertas y cuáles no.
+- [x] **`docs/contratos/evidencia.md`:** catálogo C1–C7 y formato del paquete de evidencia, tal como están en este archivo, con la descripción de cada campo y un ejemplo completo por consulta.
+- [x] **`docs/contratos/chat.md`:** entrada y salida del servicio de chat (campos, estados, ejemplo).
+- [x] **Ejemplos simulados en `data/mock/`:** `evidencia_c1.json` … `evidencia_c7.json`, más uno con `estado = "no_evaluable"` y otro con `estado = "sin_evidencia"`. Las cifras son inventadas a propósito y llevan una marca `"simulado": true`.
+- [x] **`src/evidence/`:** función `get_evidence(consulta_id, **params)` que, con `evidence_mode = "mock"`, devuelve el ejemplo correspondiente; con `"real"` lanza `NotImplementedError` con un mensaje claro. Pruebas en `tests/` que validan que cada ejemplo cumple el contrato.
+- [x] **`README.md` completo** con estas secciones:
   1. Qué es el proyecto y en qué estado está.
   2. Requisitos (Python, Git y, para el agente, Ollama).
   3. Instalación paso a paso en Windows (PowerShell, incluida la política de ejecución para activar el entorno) y en macOS/Linux, y cómo comprobar que todo funciona con `pytest`.
@@ -142,8 +142,8 @@ Entrada: pregunta en texto y, si aplica, perfil o lote en sesión. Salida: respu
   9. Convenciones de nombres (scripts, ramas, commits).
   10. Reparto Luis/Ernesto y contratos.
   11. Solución de problemas (versión de Python, activación del entorno, falta el CSV, Ollama apagado, poca memoria).
-- [ ] Revisar `README.md` y `docs/`: sin fechas ni duraciones de calendario y sin menciones a notebooks.
-- [ ] Commit(s) en la rama. **No hagas push.**
+- [x] Revisar `README.md` y `docs/`: sin fechas ni duraciones de calendario y sin menciones a notebooks.
+- [x] Commit(s) en la rama. **No hagas push.**
 
 **Listo cuando:** `pytest` pasa, `python scripts/run_fase.py 1` corre sin error aunque aún no haya scripts (avisa que la fase está vacía), `.claude/settings.json` bloquea los comandos prohibidos, y alguien que no conoce el repo puede ubicar dónde poner sus datos solo con el README.
 
