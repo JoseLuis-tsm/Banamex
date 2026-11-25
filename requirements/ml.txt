@@ -1,0 +1,5 @@
+# Capa de modelos: incluye la capa base
+-r base.txt
+xgboost
+shap
+optuna

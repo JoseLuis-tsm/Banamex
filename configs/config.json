@@ -1,0 +1,17 @@
+{
+  "seed": 42,
+  "horizon_mob": 6,
+  "data_cutoff_vintage": 202609,
+  "split": {
+    "train": {"start": 202401, "end": 202508},
+    "validation": {"start": 202509, "end": 202511},
+    "test": {"start": 202512, "end": 202603},
+    "test_s1": {"start": 202512, "end": 202609}
+  },
+  "paths": {
+    "raw_data": "data/raw/base_cards_sintetica.csv",
+    "dictionary": "data/contracts/diccionario_variables.csv",
+    "processed_dir": "data/processed",
+    "models_dir": "models"
+  }
+}

@@ -1,0 +1,8 @@
+# Capa base: análisis de datos y gráficas (+ herramientas mínimas de desarrollo)
+pandas
+numpy
+scikit-learn
+plotly
+ipykernel
+nbformat
+pytest
