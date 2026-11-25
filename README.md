@@ -1,6 +1,6 @@
 # Sistema de Inteligencia Crediticia (Tarjetas de Crédito)
 
-Plataforma local que estima, por perfil de adquisición, la línea promedio, el monto total, la tasa de impago y la estrategia sugerida. El contexto completo está en [CLAUDE.md](CLAUDE.md) y el avance en [PLAN.md](PLAN.md).
+Plataforma local que estima, por perfil de adquisición, la línea promedio, el monto total, la tasa de impago y la estrategia sugerida.
 
 ## Cómo empezar
 
