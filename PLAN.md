@@ -186,7 +186,7 @@ Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba,
   - Hace: `src/features/engineering.py` con one-hot (estrategia, segmento, producto, canal), edad ordinal, **posición relativa del score 0–1 dentro de su familia** más la familia, y mes de booking derivado de la vintage; partición temporal por vintage (entrenamiento 202401–202508, validación 202509–202511, prueba 202512–202603; S1 hasta 202609); **prueba automática de que no hay fuga** (ninguna vintage en dos conjuntos; ninguna columna de resultado, MOB, vintage numérica ni pesos entre las variables).
   - Entra → sale: `s1_dataset.csv`, `s3_dataset.csv` → matrices y particiones en `data/processed/`.
   - Listo cuando: la prueba de fuga pasa y el conteo de filas por conjunto coincide con la tabla de `CLAUDE.md` §7.
-- [ ] **`01_s1_linea_base.py`**
+- [x] **`01_s1_linea_base.py`**
   - Hace: media ponderada por producto y score; GLM Gamma (scikit-learn) con peso por cuentas; métricas en validación y prueba (MAE, MAPE, R² y sesgo ponderados).
   - Entra → sale: matrices de S1 → métricas en `reports/02_modelos_prediccion/`.
   - Listo cuando: las métricas de ambas líneas base quedan guardadas.
