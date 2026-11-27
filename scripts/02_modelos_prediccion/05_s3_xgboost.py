@@ -271,6 +271,7 @@ def save_results(results: dict, config: dict) -> list:
         return {r["grupo"]: {k: float(r[k]) for k in keys} for _, r in rows.iterrows()}
 
     metadata = {
+        "tipo_modelo": "xgboost",
         "descripcion": "S3: tasa acumulada de Over30 a 6 meses (OVER30ACCTS / ENRACCTS en MOB = 6), calibrada. XGBoost con etiqueta fraccional y peso ENRACCTS.",
         "objetivo": "TASA_OVER30 = OVER30ACCTS / ENRACCTS en MOB = 6 (OVER30ACCTS acumulado)",
         "peso": "ENRACCTS",

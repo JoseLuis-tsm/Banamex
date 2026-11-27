@@ -1,7 +1,7 @@
 {
   "salida": "s1",
   "version": "s1-4eeb609786",
-  "fecha": "2026-11-27T02:33:12+00:00",
+  "fecha": "2026-11-27T03:09:04+00:00",
   "versiones_librerias": {
     "python": "3.12.6",
     "numpy": "2.2.6",
@@ -246,5 +246,6 @@
   "archivos": {
     "modelo": "modelo.json",
     "modelo_evaluacion": "modelo_evaluacion.json"
-  }
+  },
+  "tipo_modelo": "xgboost"
 }

@@ -2,17 +2,16 @@
 
 > Generada por `scripts/02_modelos_prediccion/06_resumen_modelos.py` a partir de `metadata.json` y de los reportes de métricas. No editar a mano: se regenera al correr el script.
 
-- **Estado:** **No publicado**: no cumplió el criterio de publicación.
-- **Versión:** `s1-4eeb609786` · **Datos (SHA-256):** `7f52a02f2a0b81de…`
+- **Estado:** **Publicado** (models/s1/actual.json).
+- **Versión:** `s1-ec19747b9b` · **Datos (SHA-256):** `7f52a02f2a0b81de…`
 - **Base de datos sintética:** sí. Las cifras describen la base sintética, no datos reales.
 - **Partición temporal por vintage:** entrenamiento 202401–202508 (20), validación 202509–202511 (3), prueba 202512–202609 (10). El modelo final se reentrena con 33 vintages.
 - **Uso de la prueba:** el conjunto de prueba se evaluó **una sola vez**, al final, con el modelo entrenado solo con entrenamiento; hiperparámetros, retransformación y calibración se eligieron en validación.
-- **Variables:** 57 (one-hot de estrategia, segmento, producto y canal; edad ordinal; posición del score 0–1 en su familia; familia; mes de booking). No entran la vintage, el MOB, los pesos ni las columnas de resultado.
-- **Hiperparámetros:** profundidad 2, eta 0.0244, 918 rondas; Optuna 50 pruebas, parada temprana 50, semilla 42.
+- **Variables:** producto y rango de score (tabla de medias ponderadas; si la combinación no se vio, solo producto y luego global).
 
 ## Qué estima
 
-La línea de crédito promedio por cuenta que recibe un perfil al booking: `CREDITLINESAMTS / ACCOUNTS` en MOB = 0. XGBoost sobre el logaritmo de la línea, con peso = `ACCOUNTS`. Retransformación elegida en validación: **duan** (factor del modelo final 1.0722).
+La línea de crédito promedio por cuenta que recibe un perfil al booking: `CREDITLINESAMTS / ACCOUNTS` en MOB = 0. **Modelo publicado: línea base simple**, la línea media ponderada por producto × rango de score (Σ `CREDITLINESAMTS` / Σ `ACCOUNTS` del grupo); si la combinación no se vio, usa solo el producto y, al final, el valor global. El modelo final se recalcula con todas las vintages.
 
 ## Resultados (totales)
 
@@ -41,10 +40,11 @@ La línea de crédito promedio por cuenta que recibe un perfil al booking: `CRED
 
 ## Criterio de publicación
 
-MAE de prueba al menos 10% menor que el de la línea base simple. Mejora obtenida: **-2.9%** → **no aprobado**.
+Un XGBoost se publica solo si supera a su línea base (MAE de prueba al menos 10% menor). El XGBoost evaluado (`s1-4eeb609786`) obtuvo MAE de prueba 15,892, una mejora de **-2.9%** sobre la base simple → **no aprobado**. Línea base simple, por decisión de Luis en la Fase 2 (opción A).
 
 ## Limitaciones
 
 - DARIA solo aparece en validación y prueba: sus métricas miden extrapolación (el modelo no vio DARIA al entrenar).
 - Ningún modelo explica la variación de la línea entre cohortes de un mismo perfil; el error relativo (MAPE) es parecido en todos los modelos.
+- La base simple solo distingue producto y rango de score: perfiles que difieren en estrategia, segmento, canal o edad reciben la misma línea. Los rangos de score DARIA no aparecen en entrenamiento: en la evaluación de prueba esos perfiles usaron el respaldo por producto; el modelo final, recalculado con todas las vintages, sí los incluye.
 - La herramienta no aprueba ni rechaza créditos ni predice por cliente individual.

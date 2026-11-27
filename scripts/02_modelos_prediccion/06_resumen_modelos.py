@@ -105,10 +105,14 @@ def common_header(meta: dict, published: bool, title: str) -> str:
         f"El modelo final se reentrena con {len(v['modelo_final'])} vintages.\n"
         "- **Uso de la prueba:** el conjunto de prueba se evaluó **una sola vez**, al final, con el modelo entrenado solo con entrenamiento; "
         "hiperparámetros, retransformación y calibración se eligieron en validación.\n"
-        f"- **Variables:** {len(meta['variables'])} (one-hot de estrategia, segmento, producto y canal; edad ordinal; posición del score 0–1 en su familia; familia; mes de booking). "
-        "No entran la vintage, el MOB, los pesos ni las columnas de resultado.\n"
-        f"- **Hiperparámetros:** profundidad {meta['hiperparametros']['max_depth']}, eta {meta['hiperparametros']['eta']:.4f}, "
-        f"{meta['rondas']} rondas; Optuna {meta['busqueda']['pruebas']} pruebas, parada temprana {meta['busqueda']['parada_temprana']}, semilla {meta['semilla']}.\n\n"
+        + (
+            f"- **Variables:** {len(meta['variables'])} (one-hot de estrategia, segmento, producto y canal; edad ordinal; posición del score 0–1 en su familia; familia; mes de booking). "
+            "No entran la vintage, el MOB, los pesos ni las columnas de resultado.\n"
+            f"- **Hiperparámetros:** profundidad {meta['hiperparametros']['max_depth']}, eta {meta['hiperparametros']['eta']:.4f}, "
+            f"{meta['rondas']} rondas; Optuna {meta['busqueda']['pruebas']} pruebas, parada temprana {meta['busqueda']['parada_temprana']}, semilla {meta['semilla']}.\n\n"
+            if meta.get("tipo_modelo", "xgboost") == "xgboost" else
+            "- **Variables:** producto y rango de score (tabla de medias ponderadas; si la combinación no se vio, solo producto y luego global).\n\n"
+        )
     )
 
 
@@ -116,20 +120,43 @@ def ficha_s1(meta: dict, published: bool, cmp: pd.DataFrame) -> str:
     totals = cmp[cmp["desglose"] == "Total"][["modelo", "conjunto", "mae", "mape_pct", "r2", "sesgo_pct"]]
     by = cmp[(cmp["conjunto"] == TEST) & (cmp["desglose"] == "STRATEGY")][["modelo", "grupo", "mae", "mape_pct", "sesgo_pct", "peso"]]
     fmt = {"mae": "{:,.0f}", "mape_pct": "{:.1f}%", "r2": "{:.3f}", "sesgo_pct": "{:+.1f}%", "peso": "{:,.0f}"}
-    c = meta["criterio"]
-    r = meta["retransformacion"]
+    if meta.get("tipo_modelo") == "base_simple":
+        d = meta["decision"]
+        x = d["xgboost_evaluado"]
+        what = (
+            "## Qué estima\n\nLa línea de crédito promedio por cuenta que recibe un perfil al booking: "
+            "`CREDITLINESAMTS / ACCOUNTS` en MOB = 0. **Modelo publicado: línea base simple**, la línea media ponderada por "
+            "producto × rango de score (Σ `CREDITLINESAMTS` / Σ `ACCOUNTS` del grupo); si la combinación no se vio, usa solo el "
+            "producto y, al final, el valor global. El modelo final se recalcula con todas las vintages.\n\n"
+        )
+        criterion = (
+            "## Criterio de publicación\n\n"
+            f"{d['regla']} El XGBoost evaluado (`{x['version']}`) obtuvo MAE de prueba {x['mae_prueba']:,.0f}, "
+            f"una mejora de **{100 * x['mejora']:.1f}%** sobre la base simple → **no aprobado**. {d['publicado']}\n\n"
+        )
+    else:
+        c, r = meta["criterio"], meta["retransformacion"]
+        what = (
+            "## Qué estima\n\nLa línea de crédito promedio por cuenta que recibe un perfil al booking: "
+            "`CREDITLINESAMTS / ACCOUNTS` en MOB = 0. XGBoost sobre el logaritmo de la línea, con peso = `ACCOUNTS`. "
+            f"Retransformación elegida en validación: **{r['metodo']}** (factor del modelo final {r['factor']:.4f}).\n\n"
+        )
+        criterion = (
+            "## Criterio de publicación\n\n"
+            f"{c['regla']}. Mejora obtenida: **{100 * c['mejora']:.1f}%** → **{'aprobado' if c['aprobado'] else 'no aprobado'}**.\n\n"
+        )
     return (
         common_header(meta, published, "S1 — Línea promedio esperada")
-        + "## Qué estima\n\nLa línea de crédito promedio por cuenta que recibe un perfil al booking: "
-        "`CREDITLINESAMTS / ACCOUNTS` en MOB = 0. XGBoost sobre el logaritmo de la línea, con peso = `ACCOUNTS`. "
-        f"Retransformación elegida en validación: **{r['metodo']}** (factor del modelo final {r['factor']:.4f}).\n\n"
-        "## Resultados (totales)\n\n" + md_table(totals, fmt) + "\n\n"
+        + what
+        + "## Resultados (totales)\n\n" + md_table(totals, fmt) + "\n\n"
         "## Prueba por estrategia\n\n" + md_table(by, fmt) + "\n\n"
-        "## Criterio de publicación\n\n"
-        f"{c['regla']}. Mejora obtenida: **{100 * c['mejora']:.1f}%** → **{'aprobado' if c['aprobado'] else 'no aprobado'}**.\n\n"
-        "## Limitaciones\n\n"
+        + criterion
+        + "## Limitaciones\n\n"
         "- DARIA solo aparece en validación y prueba: sus métricas miden extrapolación (el modelo no vio DARIA al entrenar).\n"
         "- Ningún modelo explica la variación de la línea entre cohortes de un mismo perfil; el error relativo (MAPE) es parecido en todos los modelos.\n"
+        "- La base simple solo distingue producto y rango de score: perfiles que difieren en estrategia, segmento, canal o edad reciben la misma línea. "
+        "Los rangos de score DARIA no aparecen en entrenamiento: en la evaluación de prueba esos perfiles usaron el respaldo por producto; "
+        "el modelo final, recalculado con todas las vintages, sí los incluye.\n"
         "- La herramienta no aprueba ni rechaza créditos ni predice por cliente individual.\n"
     )
 

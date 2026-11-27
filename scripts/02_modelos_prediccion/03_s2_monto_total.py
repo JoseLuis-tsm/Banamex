@@ -5,6 +5,8 @@ Objetivo:
     publicado y comprobar que el resultado es exactamente ese producto. Como ejemplo de
     uso, toma como "cuentas planeadas" las cuentas reales de cada cohorte de prueba y
     compara el monto esperado con el monto de línea observado, total y por estrategia.
+    Es una ilustración **en muestra**, no una evaluación: el S1 publicado se recalculó con
+    todas las vintages, incluidas las de prueba (las métricas de S1 están en su ficha).
 
 Entradas:
     - models/s1/actual.json y el modelo publicado (de 02_s1_xgboost.py).
@@ -97,6 +99,7 @@ def main() -> int:
 
     print(f"S2 = cuentas planeadas × S1 (modelo {results['version']}):")
     print(f"  Exacto en todas las filas: {'sí' if results['exact'] else 'NO'}")
+    print("  Comparación con el monto observado (en muestra: el S1 publicado incluye las vintages de prueba):")
     for _, row in results["summary"].iterrows():
         print(f"  {row['estrategia']:22s} {row['cuentas']:>9,} cuentas  S2 {row['monto_esperado_s2']:>16,.0f}  "
               f"observado {row['monto_observado']:>16,.0f}  ({row['diferencia_pct']:+.1f}%)")

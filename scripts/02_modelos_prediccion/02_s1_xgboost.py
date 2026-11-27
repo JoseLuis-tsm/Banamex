@@ -23,8 +23,10 @@ Cómo correrlo (desde la raíz del repo):
     python scripts/02_modelos_prediccion/02_s1_xgboost.py --pruebas 10   # búsqueda corta, para revisar
 
 Listo cuando:
-    El MAE de prueba es al menos 10% menor que el de la línea base simple. Si no, no se
-    publica y el script sale con código 1.
+    El MAE de prueba es al menos 10% menor que el de la línea base simple. Si no, el
+    XGBoost no se publica (su versión queda guardada como registro) y, por decisión de Luis
+    en la Fase 2, se publica como S1 la **línea base simple** (producto × score) reentrenada
+    con todas las vintages. Sale con código 1 solo si no se pudo publicar ningún S1.
 """
 
 # Encabezado estándar: agrega la raíz del repo a sys.path para poder importar src.
@@ -43,6 +45,7 @@ import xgboost as xgb  # noqa: E402
 from src.data import catalog as cat  # noqa: E402
 from src.features.engineering import TEST, TRAIN, VALIDATION, feature_columns  # noqa: E402
 from src.models import registry  # noqa: E402
+from src.models.baselines import RatioBaseline  # noqa: E402
 from src.models.metrics import metrics_table, regression_metrics  # noqa: E402
 from src.models.predict import MODEL_FILE  # noqa: E402
 from src.models.tuning import N_TRIALS, predict_best, train_booster, tune  # noqa: E402
@@ -213,11 +216,70 @@ def save_results(results: dict, config: dict) -> list:
         "base_sintetica": True,
         "archivos": {"modelo": MODEL_FILE, "modelo_evaluacion": "modelo_evaluacion.json"},
     }
+    metadata["tipo_modelo"] = "xgboost"
     written.append(registry.save_metadata(models_dir, "s1", version, metadata))
     results["version"] = version
     if results["approved"]:
         written.append(registry.publish(models_dir, "s1", version))
+    else:
+        written += publish_baseline(results, config, data_hash, version)
     return written
+
+
+def publish_baseline(results: dict, config: dict, data_hash: str, xgb_version: str) -> list:
+    """Publica la línea base simple como S1 (decisión de Luis cuando el XGBoost no cumple).
+
+    Qué hace: reentrena RatioBaseline (Σ CREDITLINESAMTS / Σ ACCOUNTS por producto × score,
+    con respaldo a producto y global) con las 33 vintages, la guarda en JSON y la publica.
+    Por qué: fue el mejor modelo en prueba, se explica con una tabla y S2, la API y el agente
+    necesitan un S1. Sus métricas son las de la base entrenada solo con entrenamiento
+    (01_s1_linea_base.py), evaluada una sola vez en prueba.
+    """
+    frame = results["frame"]
+    levels = [["PRODUCT", "SCORE_TAG"], ["PRODUCT"], []]
+    final = RatioBaseline(levels, "CREDITLINESAMTS", "ACCOUNTS").fit(frame)
+    version = registry.version_id("s1", {"datos": data_hash, "tipo": "base_simple", "niveles": levels})
+    models_dir = get_path(config, "models_dir")
+    folder = registry.version_dir(models_dir, "s1", version)
+    registry.write_json(folder / MODEL_FILE, final.to_dict())
+
+    baseline = pd.read_csv(get_path(config, "reports_dir") / "02_modelos_prediccion" / "s1_linea_base_metricas.csv", encoding="utf-8")
+    base = baseline[baseline["modelo"] == SIMPLE_NAME]
+    keys = ["mae", "mape_pct", "r2", "sesgo", "sesgo_pct", "peso", "filas"]
+
+    def block(split: str, by: str) -> dict:
+        rows = base[(base["conjunto"] == split) & (base["desglose"] == by)]
+        return {r["grupo"]: {k: float(r[k]) for k in keys} for _, r in rows.iterrows()}
+
+    metadata = {
+        "tipo_modelo": "base_simple",
+        "descripcion": "S1: línea promedio esperada por cuenta en MOB = 0. Línea media ponderada por producto × score (Σ CREDITLINESAMTS / Σ ACCOUNTS), con respaldo a solo producto y a global.",
+        "objetivo": "LINEA_PROMEDIO = CREDITLINESAMTS / ACCOUNTS en MOB = 0",
+        "peso": "ACCOUNTS",
+        "variables": ["PRODUCT", "SCORE_TAG"],
+        "niveles_respaldo": levels,
+        "vintages": {
+            "entrenamiento": vintage_list(frame, TRAIN), "validacion": vintage_list(frame, VALIDATION),
+            "prueba": vintage_list(frame, TEST), "modelo_final": vintage_list(frame),
+        },
+        "metricas": {
+            "validacion": block(VALIDATION, "Total").get("Total"),
+            "prueba": block(TEST, "Total").get("Total"),
+            "prueba_por_estrategia": block(TEST, "STRATEGY"),
+            "nota": "Métricas de la base ajustada solo con entrenamiento (01_s1_linea_base.py). La prueba se evaluó una sola vez.",
+        },
+        "decision": {
+            "regla": "Un XGBoost se publica solo si supera a su línea base (MAE de prueba al menos 10% menor).",
+            "xgboost_evaluado": {"version": xgb_version, "mae_prueba": results["test_mae"], "mejora": results["improvement"], "aprobado": False},
+            "publicado": "Línea base simple, por decisión de Luis en la Fase 2 (opción A).",
+        },
+        "datos_sha256": data_hash,
+        "semilla": config["seed"],
+        "base_sintetica": True,
+        "archivos": {"modelo": MODEL_FILE},
+    }
+    results["published_version"] = version
+    return [registry.save_metadata(models_dir, "s1", version, metadata), registry.publish(models_dir, "s1", version)]
 
 
 # ===== 4. Gráficas =====
@@ -290,11 +352,15 @@ def main() -> int:
     for _, row in m[(m["conjunto"] == TEST) & (m["desglose"] == "STRATEGY")].iterrows():
         print(f"    {row['grupo']:22s} MAE {row['mae']:>9,.0f}  MAPE {row['mape_pct']:5.1f}%  sesgo {row['sesgo_pct']:+5.1f}%  ({int(row['peso']):,} cuentas)")
     print(f"Criterio: MAE de prueba {results['test_mae']:,.0f} vs. base simple {results['base_mae']:,.0f} → mejora {results['improvement']:.1%} (se exige ≥ 10%)")
-    print(f"  {'APROBADO: publicado como ' + results['version'] if results['approved'] else 'NO APROBADO: la versión ' + results['version'] + ' se guardó pero no se publicó.'}")
+    if results["approved"]:
+        print(f"  APROBADO: publicado como {results['version']}")
+    else:
+        print(f"  NO APROBADO: el XGBoost {results['version']} se guardó pero no se publicó.")
+        print(f"  Publicada como S1 la línea base simple (decisión A): {results['published_version']}")
     print("Archivos escritos:")
     for path in written:
         print(f"  - {path}")
-    return 0 if results["approved"] else 1
+    return 0
 
 
 if __name__ == "__main__":

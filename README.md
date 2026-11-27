@@ -13,7 +13,7 @@ Plataforma **local** que, para un perfil de adquisición de tarjetas de crédito
 
 Cada resultado se explica con SHAP y se puede consultar en lenguaje natural con un asistente (RAG + Ollama) que **solo redacta sobre cifras ya calculadas**. No aprueba ni rechaza créditos, no predice por cliente individual y no afirma causalidad. Los datos del proyecto son una **base sintética**.
 
-**Estado:** infraestructura lista (Fases 0 y 0b) y Fase 1 (datos) terminada, pendiente de revisión: base validada, datasets de S1 y S3 generados y decisiones de datos en [docs/datos_fase1.md](docs/datos_fase1.md). Fase 2 (modelos) en curso: S3 publicado; S1 no cumplió su criterio de publicación y está pendiente de decisión (ver [docs/fichas/](docs/fichas/)). En paralelo, la Fase 5B (agente, Ernesto). El avance detallado está en [PLAN.md](PLAN.md) y las reglas del proyecto en [CLAUDE.md](CLAUDE.md).
+**Estado:** infraestructura lista (Fases 0 y 0b) y Fase 1 (datos) terminada, pendiente de revisión: base validada, datasets de S1 y S3 generados y decisiones de datos en [docs/datos_fase1.md](docs/datos_fase1.md). Fase 2 (modelos) terminada: S3 publicado (XGBoost calibrado) y S1 publicado como línea base simple, porque su XGBoost no cumplió el criterio; S2 se calcula como cuentas × S1. Fichas en [docs/fichas/](docs/fichas/). En paralelo, la Fase 5B (agente, Ernesto). El avance detallado está en [PLAN.md](PLAN.md) y las reglas del proyecto en [CLAUDE.md](CLAUDE.md).
 
 ---
 

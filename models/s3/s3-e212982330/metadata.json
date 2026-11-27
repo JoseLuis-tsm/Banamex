@@ -1,7 +1,7 @@
 {
   "salida": "s3",
   "version": "s3-e212982330",
-  "fecha": "2026-11-27T03:04:26+00:00",
+  "fecha": "2026-11-27T03:11:14+00:00",
   "versiones_librerias": {
     "python": "3.12.6",
     "numpy": "2.2.6",
@@ -12,6 +12,7 @@
     "shap": "0.49.1",
     "plotly": "7.2.0"
   },
+  "tipo_modelo": "xgboost",
   "descripcion": "S3: tasa acumulada de Over30 a 6 meses (OVER30ACCTS / ENRACCTS en MOB = 6), calibrada. XGBoost con etiqueta fraccional y peso ENRACCTS.",
   "objetivo": "TASA_OVER30 = OVER30ACCTS / ENRACCTS en MOB = 6 (OVER30ACCTS acumulado)",
   "peso": "ENRACCTS",

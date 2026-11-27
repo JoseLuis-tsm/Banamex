@@ -1,7 +1,11 @@
 """Carga de los modelos publicados y predicción por perfil (la usan S2, la API y el agente).
 
-S1: el XGBoost predice log(línea); la línea es exp(predicción) · factor de retransformación
-(guardado en metadata.json; 1.0 si no se usa).
+S1 puede ser de dos tipos (metadata.json → "tipo_modelo"):
+  - "base_simple": línea media ponderada por producto × score (Σ CREDITLINESAMTS / Σ ACCOUNTS),
+    con respaldo a solo producto y a global. Es el publicado cuando el XGBoost no supera
+    su criterio (decisión de Luis en la Fase 2).
+  - "xgboost": el XGBoost predice log(línea); la línea es exp(predicción) · factor de
+    retransformación (guardado en metadata.json; 1.0 si no se usa).
 S3: el XGBoost predice la tasa sin calibrar p; la tasa final pasa por la calibración de
 Platt ajustada en validación: p_cal = σ(a · logit(p) + b), con a y b en metadata.json.
 """
@@ -14,7 +18,8 @@ import pandas as pd
 import xgboost as xgb
 
 from src.features.engineering import build_features, feature_columns
-from src.models.registry import current
+from src.models.baselines import RatioBaseline
+from src.models.registry import current, read_json
 
 MODEL_FILE = "modelo.json"
 EPS = 1e-6
@@ -42,16 +47,24 @@ def booster_predict(booster: xgb.Booster, features: pd.DataFrame) -> np.ndarray:
 
 
 class S1Model:
-    """Modelo publicado de S1: línea promedio esperada por perfil."""
+    """Modelo publicado de S1: línea promedio esperada por perfil (XGBoost o base simple)."""
 
-    def __init__(self, booster: xgb.Booster, metadata: Dict[str, Any]):
-        self.booster = booster
+    def __init__(self, model: Any, metadata: Dict[str, Any]):
+        self.model = model
         self.metadata = metadata
+        self.kind = metadata.get("tipo_modelo", "xgboost")
         self.smearing = float(metadata.get("retransformacion", {}).get("factor", 1.0))
 
     def predict_line(self, profiles: pd.DataFrame) -> np.ndarray:
-        """Línea promedio esperada: exp(f(x)) · factor, con f el XGBoost sobre log(línea)."""
-        return np.exp(booster_predict(self.booster, build_features(profiles))) * self.smearing
+        """Línea promedio esperada por cuenta.
+
+        base_simple: Σ CREDITLINESAMTS / Σ ACCOUNTS del grupo (producto × score, o respaldo).
+        xgboost: exp(f(x)) · factor, con f el XGBoost sobre log(línea).
+        """
+        if self.kind == "base_simple":
+            build_features(profiles)  # valida que el perfil esté en el catálogo
+            return self.model.predict(profiles)
+        return np.exp(booster_predict(self.model, build_features(profiles))) * self.smearing
 
 
 class S3Model:
@@ -73,6 +86,8 @@ def _load(models_dir: Path, output: str):
     if found is None:
         raise FileNotFoundError(f"No hay modelo publicado de {output} (falta models/{output}/actual.json).")
     folder, metadata = found
+    if metadata.get("tipo_modelo") == "base_simple":
+        return RatioBaseline.from_dict(read_json(folder / MODEL_FILE)), metadata
     booster = xgb.Booster()
     booster.load_model(str(folder / MODEL_FILE))
     return booster, metadata

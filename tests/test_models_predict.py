@@ -49,3 +49,22 @@ def test_s3_aplica_platt(tmp_path):
 def test_sin_modelo_publicado_hay_error_claro(tmp_path):
     with pytest.raises(FileNotFoundError, match="actual.json"):
         load_s1(tmp_path)
+
+
+def test_s1_base_simple_publicada_se_carga_y_predice(tmp_path):
+    from src.models.baselines import RatioBaseline
+
+    train = _perfiles().assign(ACCOUNTS=10, CREDITLINESAMTS=0)
+    train["CREDITLINESAMTS"] = np.where(train["PRODUCT"] == "Costco", 300000, 500000)
+    base = RatioBaseline([["PRODUCT", "SCORE_TAG"], ["PRODUCT"], []], "CREDITLINESAMTS", "ACCOUNTS").fit(train)
+    version = registry.version_id("s1", {"base": 1})
+    registry.write_json(registry.version_dir(tmp_path, "s1", version) / MODEL_FILE, base.to_dict())
+    registry.save_metadata(tmp_path, "s1", version, {"tipo_modelo": "base_simple"})
+    registry.publish(tmp_path, "s1", version)
+
+    s1 = load_s1(tmp_path)
+    nuevos = _perfiles(5).assign(SCORE_TAG="i.205+", STRATEGY="DARIA 1.6", STRATEGY_SEGMENT="LE Thin")  # score no visto
+    assert s1.predict_line(nuevos) == pytest.approx(np.where(nuevos["PRODUCT"] == "Costco", 30000.0, 50000.0))
+    assert s1.predict_line(train) == pytest.approx(base.predict(train))
+    with pytest.raises(ValueError):  # perfil fuera de catálogo
+        s1.predict_line(nuevos.assign(PRODUCT="Inventado"))

@@ -178,7 +178,7 @@ Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos apr
 
 ---
 
-## Fase 2 — Modelos S1, S2 y S3 `[L]` (`scripts/02_modelos_prediccion/`)
+## Fase 2 — Modelos S1, S2 y S3 `[L]` (`scripts/02_modelos_prediccion/`) ✅
 
 Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba, versionados.
 
@@ -190,7 +190,7 @@ Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba,
   - Hace: media ponderada por producto y score; GLM Gamma (scikit-learn) con peso por cuentas; métricas en validación y prueba (MAE, MAPE, R² y sesgo ponderados).
   - Entra → sale: matrices de S1 → métricas en `reports/02_modelos_prediccion/`.
   - Listo cuando: las métricas de ambas líneas base quedan guardadas.
-- [ ] **`02_s1_xgboost.py`**
+- [x] **`02_s1_xgboost.py`** — el XGBoost no cumplió el criterio (MAE de prueba 2.9% peor que la base simple); por decisión de Luis se publica la **línea base simple** como S1 (ver `docs/fichas/ficha_s1.md`).
   - Hace: XGBoost sobre el logaritmo de la línea, peso = `ACCOUNTS`, árboles poco profundos; Optuna (50 pruebas) con parada temprana (50 rondas) y semilla 42, sobre validación; mismas métricas contra la línea base y reporte por estrategia; guarda modelo y `metadata.json` (`src/models/registry.py`).
   - Entra → sale: matrices de S1 → `models/s1/<versión>/` y `models/s1/actual.json`.
   - Listo cuando: **el MAE de prueba es al menos 10% menor que el de la línea base simple**; si no, no se publica y me avisas.
@@ -206,7 +206,7 @@ Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba,
   - Hace: XGBoost con etiqueta fraccional, peso = `ENRACCTS`, restricción monótona decreciente en el score; Optuna y parada temprana como en S1; calibración ajustada **solo en validación** (por ejemplo, regresión isotónica o de Platt con scikit-learn; documenta cuál y por qué); métricas contra la línea base, calibración por deciles y reporte por estrategia y por rango de edad; guarda modelo y `metadata.json`.
   - Entra → sale: matrices de S3 → `models/s3/<versión>/`, `models/s3/actual.json`.
   - Listo cuando: **no es peor que el GLM, la razón observado/predicho está entre 0.95 y 1.05 y la tasa observada crece con el nivel de riesgo**; si no, no se publica y me avisas.
-- [ ] **`06_resumen_modelos.py`**
+- [x] **`06_resumen_modelos.py`**
   - Hace: tabla resumen de S1 y S3 (modelo contra línea base, validación contra prueba) y ficha corta de cada modelo en `docs/fichas/`. Deja constancia de que el conjunto de prueba se evaluó **una sola vez** y de que la base es sintética.
   - Entra → sale: metadatos y métricas → `docs/fichas/ficha_s1.md`, `ficha_s3.md`.
   - Listo cuando: las fichas están completas y yo las revisé.

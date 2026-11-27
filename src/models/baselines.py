@@ -51,3 +51,26 @@ class RatioBaseline:
             used[fill] = level
         self.last_levels = used
         return pred
+
+    def to_dict(self) -> Dict:
+        """Representación JSON: niveles y, por nivel, filas {clave..., valor}."""
+        levels = []
+        for keys, ratio in self.tables:
+            rows = [{**dict(zip(keys, k if isinstance(k, tuple) else (k,))), "valor": float(v)} for k, v in ratio.items()] if keys else [{"valor": float(ratio[()])}]
+            levels.append({"claves": keys, "filas": rows})
+        return {"tipo": "RatioBaseline", "numerador": self.numerator, "denominador": self.denominator, "niveles": levels}
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> "RatioBaseline":
+        """Reconstruye la línea base desde to_dict()."""
+        model = cls([lvl["claves"] for lvl in data["niveles"]], data["numerador"], data["denominador"])
+        for lvl in data["niveles"]:
+            keys = lvl["claves"]
+            if not keys:
+                ratio = {(): lvl["filas"][0]["valor"]}
+            elif len(keys) == 1:
+                ratio = {r[keys[0]]: r["valor"] for r in lvl["filas"]}
+            else:
+                ratio = {tuple(r[k] for k in keys): r["valor"] for r in lvl["filas"]}
+            model.tables.append((keys, ratio))
+        return model
