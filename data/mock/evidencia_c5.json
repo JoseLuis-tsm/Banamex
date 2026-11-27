@@ -1,0 +1,81 @@
+{
+  "consulta_id": "C5",
+  "estado": "ok",
+  "funcion": "evidence.vintage_evolution",
+  "parametros": {
+    "vintage": 202506
+  },
+  "cifras": {
+    "vintage": 202506,
+    "horizonte_meses": 6,
+    "tasa_over30_mob6": 0.058,
+    "mob_maximo_observado": 15,
+    "cuentas_mob0": 5210
+  },
+  "tablas": [
+    {
+      "nombre": "over30_por_mob",
+      "columnas": [
+        "mob",
+        "cuentas_expuestas",
+        "cuentas_over30",
+        "tasa_over30"
+      ],
+      "filas": [
+        [
+          0,
+          5210,
+          0,
+          0.0
+        ],
+        [
+          1,
+          4980,
+          12,
+          0.002
+        ],
+        [
+          2,
+          4870,
+          58,
+          0.012
+        ],
+        [
+          3,
+          4790,
+          121,
+          0.025
+        ],
+        [
+          4,
+          4720,
+          176,
+          0.037
+        ],
+        [
+          5,
+          4660,
+          228,
+          0.049
+        ],
+        [
+          6,
+          4600,
+          267,
+          0.058
+        ]
+      ]
+    }
+  ],
+  "frases_base": [
+    "En la vintage 202506, la tasa acumulada de Over30 llega a 5.8% en el MOB 6.",
+    "Esta vintage se ha observado hasta el MOB 15."
+  ],
+  "fragmentos": [],
+  "versiones": {
+    "datos_sha256": "simulado",
+    "horizonte_mob": 6
+  },
+  "motivo": null,
+  "simulado": true
+}

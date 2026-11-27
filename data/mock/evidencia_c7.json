@@ -1,0 +1,30 @@
+{
+  "consulta_id": "C7",
+  "estado": "ok",
+  "funcion": "evidence.define_term",
+  "parametros": {
+    "termino": "GCL"
+  },
+  "cifras": {},
+  "tablas": [],
+  "frases_base": [],
+  "fragmentos": [
+    {
+      "fuente": "data/knowledge/glosario.md",
+      "titulo": "GCL (pérdida bruta)",
+      "texto": "GCL es la pérdida bruta: la suma de los saldos de las cuentas que se dieron por perdidas, antes de descontar lo recuperado.",
+      "puntaje": 0.83
+    },
+    {
+      "fuente": "data/knowledge/glosario.md",
+      "titulo": "NCL (pérdida neta)",
+      "texto": "NCL es la pérdida neta: la pérdida bruta (GCL) menos lo recuperado.",
+      "puntaje": 0.71
+    }
+  ],
+  "versiones": {
+    "base_documental": "simulado"
+  },
+  "motivo": null,
+  "simulado": true
+}

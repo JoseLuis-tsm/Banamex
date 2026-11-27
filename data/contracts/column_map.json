@@ -1,0 +1,53 @@
+{
+  "descripcion": "Mapa alias dummiN → nombre real (del diccionario). MOB no tiene alias.",
+  "alias_a_nombre_real": {
+    "dummi1": "VINTAGE",
+    "dummi12": "STRATEGY",
+    "dummi13": "STRATEGY_SEGMENT",
+    "dummi6": "PRODUCT",
+    "dummi3": "CHANNEL",
+    "dummi2": "AGE_TAG",
+    "dummi10": "SCORE_TAG",
+    "dummi15": "ACCOUNTS",
+    "dummi16": "CREDITLINESAMTS",
+    "dummi17": "ENRACCTS",
+    "dummi18": "OVER30ACCTS",
+    "dummi19": "OVER30AMTS",
+    "dummi20": "GCLAMTS",
+    "dummi21": "NCLAMTS",
+    "dummi22": "RECOVERYAMTS",
+    "dummi23": "ENRAMTS",
+    "dummi44": "REVENUE",
+    "dummi46": "EXPENSES_ACQ",
+    "dummi47": "EXPENSES_ECM_VAR",
+    "dummi48": "EXPENSES_ECM_FIX",
+    "dummi49": "EXPENSES_TOTAL"
+  },
+  "nombre_real_a_alias": {
+    "VINTAGE": "dummi1",
+    "STRATEGY": "dummi12",
+    "STRATEGY_SEGMENT": "dummi13",
+    "PRODUCT": "dummi6",
+    "CHANNEL": "dummi3",
+    "AGE_TAG": "dummi2",
+    "SCORE_TAG": "dummi10",
+    "ACCOUNTS": "dummi15",
+    "CREDITLINESAMTS": "dummi16",
+    "ENRACCTS": "dummi17",
+    "OVER30ACCTS": "dummi18",
+    "OVER30AMTS": "dummi19",
+    "GCLAMTS": "dummi20",
+    "NCLAMTS": "dummi21",
+    "RECOVERYAMTS": "dummi22",
+    "ENRAMTS": "dummi23",
+    "REVENUE": "dummi44",
+    "EXPENSES_ACQ": "dummi46",
+    "EXPENSES_ECM_VAR": "dummi47",
+    "EXPENSES_ECM_FIX": "dummi48",
+    "EXPENSES_TOTAL": "dummi49"
+  },
+  "sin_alias": [
+    "MOB"
+  ],
+  "formato_encontrado_en_csv": "nombres reales"
+}

@@ -1,0 +1,366 @@
+{
+  "salida": "s3",
+  "version": "s3-e212982330",
+  "fecha": "2026-11-27T03:11:14+00:00",
+  "versiones_librerias": {
+    "python": "3.12.6",
+    "numpy": "2.2.6",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.7.2",
+    "xgboost": "3.2.0",
+    "optuna": "5.1.0",
+    "shap": "0.49.1",
+    "plotly": "7.2.0"
+  },
+  "tipo_modelo": "xgboost",
+  "descripcion": "S3: tasa acumulada de Over30 a 6 meses (OVER30ACCTS / ENRACCTS en MOB = 6), calibrada. XGBoost con etiqueta fraccional y peso ENRACCTS.",
+  "objetivo": "TASA_OVER30 = OVER30ACCTS / ENRACCTS en MOB = 6 (OVER30ACCTS acumulado)",
+  "peso": "ENRACCTS",
+  "variables": [
+    "STRATEGY__14_Recalibration_1_0",
+    "STRATEGY__15_Recalibration_2_0",
+    "STRATEGY__r_Reca_champ",
+    "STRATEGY__DARIA_1_6",
+    "STRATEGY__DARIA_2_0",
+    "STRATEGY_SEGMENT__Brands_NonPayroll_OffUs_LE",
+    "STRATEGY_SEGMENT__Brands_NonPayroll_OnUs",
+    "STRATEGY_SEGMENT__Brands_Payroll_OffUs_LE",
+    "STRATEGY_SEGMENT__Brands_Payroll_OnUs",
+    "STRATEGY_SEGMENT__Costco",
+    "STRATEGY_SEGMENT__HomeDepot_Affinity",
+    "STRATEGY_SEGMENT__Priority_Affluent",
+    "STRATEGY_SEGMENT__AAC_Off_Us_Non_Payroll",
+    "STRATEGY_SEGMENT__AAC_Off_Us_Payroll",
+    "STRATEGY_SEGMENT__AAC_On_Us",
+    "STRATEGY_SEGMENT__Affinity",
+    "STRATEGY_SEGMENT__Affluent",
+    "STRATEGY_SEGMENT__Costco_Young_31",
+    "STRATEGY_SEGMENT__Costco_Non_LE",
+    "STRATEGY_SEGMENT__Costco_LE",
+    "STRATEGY_SEGMENT__Home_Depot_Young_31",
+    "STRATEGY_SEGMENT__Home_Depot_LE",
+    "STRATEGY_SEGMENT__Home_Depot_Non_LE",
+    "STRATEGY_SEGMENT__LE_Commun_NTR",
+    "STRATEGY_SEGMENT__LE_Inq_Only_No_Hit",
+    "STRATEGY_SEGMENT__LE_Thin",
+    "STRATEGY_SEGMENT__Priority_Qualified",
+    "STRATEGY_SEGMENT__Young_25",
+    "STRATEGY_SEGMENT__Young_25_30",
+    "PRODUCT__Affinity",
+    "PRODUCT__Clasica",
+    "PRODUCT__Conquista",
+    "PRODUCT__Costco",
+    "PRODUCT__Descubre",
+    "PRODUCT__Explora",
+    "PRODUCT__Home_Depot",
+    "PRODUCT__Joy",
+    "PRODUCT__Oro",
+    "PRODUCT__Platinum",
+    "PRODUCT__Teleton",
+    "PRODUCT__Beyond",
+    "CHANNEL__Aeropuerto",
+    "CHANNEL__Affinity",
+    "CHANNEL__Beyond_Prestige",
+    "CHANNEL__Branch",
+    "CHANNEL__Costco",
+    "CHANNEL__F2F",
+    "CHANNEL__Home_Depot",
+    "CHANNEL__Internet",
+    "CHANNEL__One_Click",
+    "CHANNEL__Others",
+    "CHANNEL__TMK",
+    "CHANNEL__Turismo",
+    "EDAD_ORDINAL",
+    "SCORE_POSICION",
+    "FAMILIA_DARIA",
+    "MES_BOOKING"
+  ],
+  "restriccion_monotona": {
+    "variable": "SCORE_POSICION",
+    "sentido": "decreciente",
+    "violaciones_en_prueba": 0
+  },
+  "vintages": {
+    "entrenamiento": [
+      202401,
+      202402,
+      202403,
+      202404,
+      202405,
+      202406,
+      202407,
+      202408,
+      202409,
+      202410,
+      202411,
+      202412,
+      202501,
+      202502,
+      202503,
+      202504,
+      202505,
+      202506,
+      202507,
+      202508
+    ],
+    "validacion": [
+      202509,
+      202510,
+      202511
+    ],
+    "prueba": [
+      202512,
+      202601,
+      202602,
+      202603
+    ],
+    "modelo_final": [
+      202401,
+      202402,
+      202403,
+      202404,
+      202405,
+      202406,
+      202407,
+      202408,
+      202409,
+      202410,
+      202411,
+      202412,
+      202501,
+      202502,
+      202503,
+      202504,
+      202505,
+      202506,
+      202507,
+      202508,
+      202509,
+      202510,
+      202511,
+      202512,
+      202601,
+      202602,
+      202603
+    ]
+  },
+  "hiperparametros": {
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "hist",
+    "monotone_constraints": "(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0)",
+    "seed": 42,
+    "max_depth": 2,
+    "eta": 0.023199417387182977,
+    "min_child_weight": 4.657321364078377,
+    "subsample": 0.9274989794972257,
+    "colsample_bytree": 0.6127875189001992,
+    "lambda": 1.078830916608431,
+    "alpha": 0.8193743900619275
+  },
+  "rondas": 742,
+  "busqueda": {
+    "metodo": "Optuna TPE",
+    "pruebas": 50,
+    "semilla": 42,
+    "parada_temprana": 50,
+    "metrica_validacion": "log loss ponderado"
+  },
+  "calibracion": {
+    "metodo": "Platt",
+    "formula": "p_cal = sigmoid(a * logit(p) + b)",
+    "a": 1.0005502625513556,
+    "b": 0.0046726947754277765,
+    "ajustada_en": "validacion",
+    "por_que": "Dos parámetros (validación de 3 vintages), estrictamente creciente (conserva orden, AUC y monotonía) y sin escalones.",
+    "obs_pred_modelo_final_en_muestra": 0.9969476739246325,
+    "modelo_final": "Reutiliza a y b del modelo de evaluación (no queda un conjunto apartado para recalibrar).",
+    "verificacion_modelo_final": {
+      "metodo": "Mismo procedimiento con corte más temprano: evaluación hasta antes de las 3 últimas vintages de entrenamiento, Platt en esas 3, final con todo entrenamiento, medido en validación.",
+      "corte": 202506,
+      "resultado": [
+        {
+          "opcion": "sin calibrar",
+          "obs_pred": 1.0030239862023935,
+          "log_loss": 0.27119583148816934,
+          "auc": 0.639239773120648,
+          "brier": 0.07271798770820105
+        },
+        {
+          "opcion": "reutilizar Platt del modelo de evaluación",
+          "obs_pred": 0.9994916676166045,
+          "log_loss": 0.27119590848871944,
+          "auc": 0.639239773120648,
+          "brier": 0.07271828754379245
+        },
+        {
+          "opcion": "recalibrar en muestra",
+          "obs_pred": 1.0027627585624868,
+          "log_loss": 0.2711960084937472,
+          "auc": 0.639239773120648,
+          "brier": 0.07271815563615458
+        }
+      ]
+    }
+  },
+  "umbrales_riesgo": {
+    "p50": 0.06467574540263868,
+    "p80": 0.102258950040293,
+    "p95": 0.1482133961028452,
+    "definicion": "Percentiles 50, 80 y 95 de la tasa predicha calibrada en entrenamiento, ponderados por ENRACCTS. Bajo ≤ P50 < Medio ≤ P80 < Alto ≤ P95 < Crítico."
+  },
+  "metricas": {
+    "validacion": {
+      "auc": 0.639239773120648,
+      "ks": 0.19938242201959072,
+      "gini": 0.2784795462412959,
+      "log_loss": 0.27119542241212274,
+      "brier": 0.07271796275221078,
+      "tasa_observada": 0.08070585842148088,
+      "tasa_predicha": 0.08070855596685485,
+      "obs_pred": 0.9999665767112091,
+      "peso": 98320.0,
+      "filas": 5968.0
+    },
+    "prueba": {
+      "auc": 0.646240747672998,
+      "ks": 0.21165337027361997,
+      "gini": 0.292481495345996,
+      "log_loss": 0.2897562626287262,
+      "brier": 0.07937604184610818,
+      "tasa_observada": 0.08920286167569672,
+      "tasa_predicha": 0.08812350731783287,
+      "obs_pred": 1.0122482001762703,
+      "peso": 133628.0,
+      "filas": 7825.0
+    },
+    "prueba_por_estrategia": {
+      "DARIA 1.6": {
+        "auc": 0.6324791610310534,
+        "ks": 0.19188084485985135,
+        "gini": 0.2649583220621068,
+        "log_loss": 0.3522100240873133,
+        "brier": 0.10190924721291063,
+        "tasa_observada": 0.11802399225095,
+        "tasa_predicha": 0.11266179869106642,
+        "obs_pred": 1.0475954904162983,
+        "peso": 40263.0,
+        "filas": 2347.0
+      },
+      "r.Reca champ": {
+        "auc": 0.6309349657369685,
+        "ks": 0.1878847294906062,
+        "gini": 0.261869931473937,
+        "log_loss": 0.26282351697878154,
+        "brier": 0.06965875541453782,
+        "tasa_observada": 0.07677395169496064,
+        "tasa_predicha": 0.07754154163946837,
+        "obs_pred": 0.9901009197356861,
+        "peso": 93365.0,
+        "filas": 5478.0
+      }
+    },
+    "prueba_por_edad": {
+      "01| Young < 25": {
+        "auc": 0.6483894044522243,
+        "ks": 0.21425492429226772,
+        "gini": 0.2967788089044485,
+        "log_loss": 0.2869673412130554,
+        "brier": 0.07844052489018928,
+        "tasa_observada": 0.0881908788885533,
+        "tasa_predicha": 0.0866521360952284,
+        "obs_pred": 1.0177577018024562,
+        "peso": 29799.0,
+        "filas": 1771.0
+      },
+      "02| Young 25-30": {
+        "auc": 0.6471375145969425,
+        "ks": 0.21582733518137198,
+        "gini": 0.29427502919388493,
+        "log_loss": 0.29239799365350805,
+        "brier": 0.0803393829778487,
+        "tasa_observada": 0.09044017168042805,
+        "tasa_predicha": 0.0892470231263605,
+        "obs_pred": 1.0133690571659542,
+        "peso": 51957.0,
+        "filas": 2900.0
+      },
+      "03| Mature >30": {
+        "auc": 0.6439525178364672,
+        "ks": 0.20848027100518923,
+        "gini": 0.28790503567293446,
+        "log_loss": 0.28871235937477396,
+        "brier": 0.07894855022418473,
+        "tasa_observada": 0.08854487970388648,
+        "tasa_predicha": 0.08784341170167621,
+        "obs_pred": 1.0079854366835446,
+        "peso": 51872.0,
+        "filas": 3154.0
+      }
+    },
+    "prueba_por_nivel_riesgo": [
+      {
+        "nivel": "Bajo",
+        "cohortes": 3067,
+        "cuentas_expuestas": 51897,
+        "eventos": 2639,
+        "tasa_observada": 0.05085072354856735,
+        "tasa_predicha": 0.05035229873691172
+      },
+      {
+        "nivel": "Medio",
+        "cohortes": 2216,
+        "cuentas_expuestas": 37878,
+        "eventos": 3100,
+        "tasa_observada": 0.08184170230740799,
+        "tasa_predicha": 0.0794110959019046
+      },
+      {
+        "nivel": "Alto",
+        "cohortes": 1357,
+        "cuentas_expuestas": 23594,
+        "eventos": 2723,
+        "tasa_observada": 0.11541069763499194,
+        "tasa_predicha": 0.11400733020796029
+      },
+      {
+        "nivel": "Crítico",
+        "cohortes": 1185,
+        "cuentas_expuestas": 20259,
+        "eventos": 3458,
+        "tasa_observada": 0.17068957006762425,
+        "tasa_predicha": 0.17102583290482787
+      }
+    ],
+    "nota": "Métricas del modelo de evaluación (entrenado solo con entrenamiento, calibrado en validación). La prueba se evaluó una sola vez."
+  },
+  "linea_base": {
+    "modelo": "GLM binomial",
+    "prueba": {
+      "auc": 0.6453863888908495,
+      "ks": 0.2145576038192853,
+      "gini": 0.2907727777816991,
+      "log_loss": 0.2900231975161501,
+      "brier": 0.0794342035152814,
+      "obs_pred": 0.9398030379271174
+    }
+  },
+  "criterio": {
+    "reglas": "En prueba: log loss ≤ y AUC ≥ los del GLM; obs/pred entre 0.95 y 1.05; tasa observada creciente por nivel de riesgo; sin violaciones de la monotonía en el score.",
+    "resultado": {
+      "log_loss_no_peor_que_glm": true,
+      "auc_no_peor_que_glm": true,
+      "obs_pred_en_rango": true,
+      "tasa_crece_con_nivel": true,
+      "monotonia_en_score": true
+    },
+    "aprobado": true
+  },
+  "datos_sha256": "7f52a02f2a0b81debf40d0af1c69125fae7075acff68257f1e0a6b85e30ab20b",
+  "semilla": 42,
+  "base_sintetica": true,
+  "archivos": {
+    "modelo": "modelo.json",
+    "modelo_evaluacion": "modelo_evaluacion.json"
+  }
+}

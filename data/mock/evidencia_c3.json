@@ -1,0 +1,56 @@
+{
+  "consulta_id": "C3",
+  "estado": "ok",
+  "funcion": "evidence.compare_groups",
+  "parametros": {
+    "dimension": "producto",
+    "valor_a": "Costco",
+    "valor_b": "Home Depot"
+  },
+  "cifras": {
+    "tasa_a": 0.064,
+    "tasa_b": 0.079,
+    "diferencia": -0.015,
+    "cuentas_expuestas_a": 15320,
+    "cuentas_expuestas_b": 11870,
+    "cohortes_maduras": 27,
+    "horizonte_meses": 6
+  },
+  "tablas": [
+    {
+      "nombre": "comparacion_over30_mob6",
+      "columnas": [
+        "producto",
+        "cuentas_expuestas",
+        "cuentas_over30",
+        "tasa_over30"
+      ],
+      "filas": [
+        [
+          "Costco",
+          15320,
+          980,
+          0.064
+        ],
+        [
+          "Home Depot",
+          11870,
+          938,
+          0.079
+        ]
+      ]
+    }
+  ],
+  "frases_base": [
+    "En cohortes maduras, la tasa de Over30 a 6 meses es 6.4% en Costco y 7.9% en Home Depot.",
+    "La diferencia observada es de -1.5 puntos porcentuales (Costco menos Home Depot).",
+    "Es una comparación descriptiva; no indica que el producto cause la diferencia."
+  ],
+  "fragmentos": [],
+  "versiones": {
+    "datos_sha256": "simulado",
+    "horizonte_mob": 6
+  },
+  "motivo": null,
+  "simulado": true
+}

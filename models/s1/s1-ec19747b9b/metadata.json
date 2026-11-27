@@ -1,0 +1,175 @@
+{
+  "salida": "s1",
+  "version": "s1-ec19747b9b",
+  "fecha": "2026-11-27T03:09:04+00:00",
+  "versiones_librerias": {
+    "python": "3.12.6",
+    "numpy": "2.2.6",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.7.2",
+    "xgboost": "3.2.0",
+    "optuna": "5.1.0",
+    "shap": "0.49.1",
+    "plotly": "7.2.0"
+  },
+  "tipo_modelo": "base_simple",
+  "descripcion": "S1: línea promedio esperada por cuenta en MOB = 0. Línea media ponderada por producto × score (Σ CREDITLINESAMTS / Σ ACCOUNTS), con respaldo a solo producto y a global.",
+  "objetivo": "LINEA_PROMEDIO = CREDITLINESAMTS / ACCOUNTS en MOB = 0",
+  "peso": "ACCOUNTS",
+  "variables": [
+    "PRODUCT",
+    "SCORE_TAG"
+  ],
+  "niveles_respaldo": [
+    [
+      "PRODUCT",
+      "SCORE_TAG"
+    ],
+    [
+      "PRODUCT"
+    ],
+    []
+  ],
+  "vintages": {
+    "entrenamiento": [
+      202401,
+      202402,
+      202403,
+      202404,
+      202405,
+      202406,
+      202407,
+      202408,
+      202409,
+      202410,
+      202411,
+      202412,
+      202501,
+      202502,
+      202503,
+      202504,
+      202505,
+      202506,
+      202507,
+      202508
+    ],
+    "validacion": [
+      202509,
+      202510,
+      202511
+    ],
+    "prueba": [
+      202512,
+      202601,
+      202602,
+      202603,
+      202604,
+      202605,
+      202606,
+      202607,
+      202608,
+      202609
+    ],
+    "modelo_final": [
+      202401,
+      202402,
+      202403,
+      202404,
+      202405,
+      202406,
+      202407,
+      202408,
+      202409,
+      202410,
+      202411,
+      202412,
+      202501,
+      202502,
+      202503,
+      202504,
+      202505,
+      202506,
+      202507,
+      202508,
+      202509,
+      202510,
+      202511,
+      202512,
+      202601,
+      202602,
+      202603,
+      202604,
+      202605,
+      202606,
+      202607,
+      202608,
+      202609
+    ]
+  },
+  "metricas": {
+    "validacion": {
+      "mae": 15482.31647610651,
+      "mape_pct": 37.741012984926925,
+      "r2": 0.796955625687534,
+      "sesgo": -655.3518794288326,
+      "sesgo_pct": -1.2865052371742849,
+      "peso": 119645.0,
+      "filas": 5968.0
+    },
+    "prueba": {
+      "mae": 15443.128033126502,
+      "mape_pct": 37.04127435905389,
+      "r2": 0.7579405115401019,
+      "sesgo": -447.855850910689,
+      "sesgo_pct": -0.8971817833577256,
+      "peso": 379773.0,
+      "filas": 19235.0
+    },
+    "prueba_por_estrategia": {
+      "DARIA 1.6": {
+        "mae": 14539.630574730969,
+        "mape_pct": 37.565973094037325,
+        "r2": 0.7131793360081922,
+        "sesgo": -860.0280469534096,
+        "sesgo_pct": -1.8618280741566129,
+        "peso": 89468.0,
+        "filas": 4700.0
+      },
+      "DARIA 2.0": {
+        "mae": 14421.988418780831,
+        "mape_pct": 36.86762061494752,
+        "r2": 0.7376078460597404,
+        "sesgo": -1101.0423457439815,
+        "sesgo_pct": -2.297746943756473,
+        "peso": 39362.0,
+        "filas": 1783.0
+      },
+      "r.Reca champ": {
+        "mae": 15925.42165401892,
+        "mape_pct": 36.88144368935605,
+        "r2": 0.7677054175246736,
+        "sesgo": -198.4488188548904,
+        "sesgo_pct": -0.3848894708287198,
+        "peso": 250943.0,
+        "filas": 12752.0
+      }
+    },
+    "nota": "Métricas de la base ajustada solo con entrenamiento (01_s1_linea_base.py). La prueba se evaluó una sola vez."
+  },
+  "decision": {
+    "regla": "Un XGBoost se publica solo si supera a su línea base (MAE de prueba al menos 10% menor).",
+    "xgboost_evaluado": {
+      "version": "s1-4eeb609786",
+      "mae_prueba": 15891.718638101329,
+      "mejora": -0.029047910760862106,
+      "aprobado": false
+    },
+    "publicado": "Línea base simple, por decisión de Luis en la Fase 2 (opción A)."
+  },
+  "datos_sha256": "7f52a02f2a0b81debf40d0af1c69125fae7075acff68257f1e0a6b85e30ab20b",
+  "semilla": 42,
+  "base_sintetica": true,
+  "archivos": {
+    "modelo": "modelo.json"
+  }
+}
