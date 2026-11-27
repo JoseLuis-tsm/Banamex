@@ -169,7 +169,7 @@ Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos apr
   - Hace: función de madurez a H = 6 (`src/data/cohorts.py`), con comprobación de las 27 vintages (202401–202603); curvas de la tasa de Over30 por MOB por vintage y estrategia; **proporción de cohortes con `OVER30ACCTS > ENRACCTS` en MOB = 6**; construye los conjuntos de modelado.
   - Entra → sale: base estándar → `data/processed/s1_dataset.csv` (línea en MOB = 0, todas las vintages), `data/processed/s3_dataset.csv` (tasa en MOB = 6, solo cohortes maduras) y reportes.
   - Listo cuando: ambos datasets están generados y, si la proporción de `OVER30ACCTS > ENRACCTS` es alta, queda una propuesta escrita sobre el denominador de S3 para que yo decida.
-- [ ] **`05_balance_entre_estrategias.py`**
+- [x] **`05_balance_entre_estrategias.py`**
   - Hace: aísla la ventana de asignación aleatoria (202511–202607) y compara la mezcla de perfiles entre r.Reca champ y DARIA 1.6 (edad, producto, canal, posición de score); marca DARIA 2.0 como *no evaluable en riesgo*.
   - Entra → sale: base estándar → `reports/01_datos/balance_estrategias.csv` y gráficas.
   - Listo cuando: el diagnóstico de balance queda listo para que lo use S4 en la Fase 3.
