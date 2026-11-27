@@ -21,7 +21,8 @@ Salidas:
     - models/s3/<versión>/modelo.json, modelo_evaluacion.json y metadata.json (con la
       calibración y los umbrales de riesgo); models/s3/actual.json solo si cumple.
     - reports/02_modelos_prediccion/s3_xgboost_optuna.csv, s3_xgboost_metricas.csv,
-      s3_comparacion.csv, s3_calibracion_deciles.csv, s3_niveles_riesgo.csv y
+      s3_comparacion.csv, s3_calibracion_deciles.csv, s3_niveles_riesgo.csv,
+      s3_verificacion_calibracion_final.csv y
       graficas/s3_*.html.
 
 Cómo correrlo (desde la raíz del repo):
@@ -118,6 +119,39 @@ def monotonic_check(booster: xgb.Booster, frame: pd.DataFrame) -> int:
     return score_monotonic_violations(grid, "p", SCORE_FEATURE, ["perfil"])
 
 
+def final_calibration_check(frame: pd.DataFrame, params: dict, rounds: int) -> pd.DataFrame:
+    """Verifica, sin usar la prueba, cómo calibrar el modelo final reentrenado con más vintages.
+
+    Repite el procedimiento con un corte más temprano: modelo de evaluación con las
+    vintages de entrenamiento menos las 3 últimas, Platt ajustado en esas 3; "modelo final"
+    reentrenado con todo entrenamiento; y se mide en validación (que ninguno vio) qué
+    calibración funciona mejor para el modelo final: ninguna, reutilizar los parámetros de
+    Platt del modelo de evaluación o recalibrar en muestra con todos los datos del final.
+    """
+    train = frame[frame["CONJUNTO"] == TRAIN]
+    cut = sorted(train["VINTAGE"].unique())[-3]
+    early, calib = train[train["VINTAGE"] < cut], train[train["VINTAGE"] >= cut]
+    hold = frame[frame["CONJUNTO"] == VALIDATION]
+
+    def raw(booster, part):
+        return booster.predict(xgb.DMatrix(part[feature_columns()], feature_names=feature_columns()))
+
+    evaluation = train_booster(params, dmatrix(early), num_rounds=rounds)
+    a, b = fit_platt(raw(evaluation, calib), calib["OVER30ACCTS"].to_numpy(), calib["ENRACCTS"].to_numpy())
+    final = train_booster(params, dmatrix(train), num_rounds=rounds)
+    a2, b2 = fit_platt(raw(final, train), train["OVER30ACCTS"].to_numpy(), train["ENRACCTS"].to_numpy())
+    p = raw(final, hold)
+    rows = []
+    for option, pred in (("sin calibrar", p), ("reutilizar Platt del modelo de evaluación", platt_transform(p, a, b)),
+                         ("recalibrar en muestra", platt_transform(p, a2, b2))):
+        r = rate_metrics(hold["OVER30ACCTS"], hold["ENRACCTS"], pred)
+        rows.append({"opcion": option, "obs_pred": r["obs_pred"], "log_loss": r["log_loss"], "auc": r["auc"], "brier": r["brier"]})
+    t = pd.DataFrame(rows)
+    t["distancia_a_1"] = (t["obs_pred"] - 1).abs()
+    t.attrs["corte"] = int(cut)
+    return t
+
+
 def compute(config: dict, n_trials: int) -> dict:
     """Busca hiperparámetros, calibra en validación, evalúa en prueba y reentrena con todo."""
     seed = config["seed"]
@@ -182,6 +216,10 @@ def compute(config: dict, n_trials: int) -> dict:
     checks["monotonia_en_score"] = violations == 0
     approved = all(checks.values())
 
+    # Qué hace: verifica con un corte más temprano (sin tocar la prueba) que reutilizar los
+    # parámetros de Platt sea adecuado para el modelo final reentrenado con más vintages.
+    cal_check = final_calibration_check(frame, params, rounds)
+
     # Modelo final: las 27 vintages maduras, mismos parámetros y rondas; misma calibración.
     final = train_booster(params, dmatrix(frame), num_rounds=rounds)
     final_pred = platt_transform(final.predict(xgb.DMatrix(frame[feature_columns()], feature_names=feature_columns())), a, b)
@@ -191,7 +229,7 @@ def compute(config: dict, n_trials: int) -> dict:
     return {
         "frame": frame, "params": params, "rounds": rounds, "trials": trials, "metrics": metrics, "comparison": comparison,
         "deciles": deciles, "levels": levels, "thresholds": thresholds, "platt": (a, b), "checks": checks,
-        "violations": violations, "approved": approved, "booster": booster, "final": final,
+        "violations": violations, "approved": approved, "booster": booster, "final": final, "cal_check": cal_check,
         "final_obs_pred": final_obs_pred, "importance": importance, "totals": {
             k: {m: total(m, k) for m in (MODEL_NAME, GLM_NAME)} for k in ("auc", "ks", "gini", "log_loss", "brier", "obs_pred")
         },
@@ -210,7 +248,8 @@ def save_results(results: dict, config: dict) -> list:
     reports.mkdir(parents=True, exist_ok=True)
     written = []
     for key, name in (("trials", "s3_xgboost_optuna.csv"), ("metrics", "s3_xgboost_metricas.csv"), ("comparison", "s3_comparacion.csv"),
-                      ("deciles", "s3_calibracion_deciles.csv"), ("levels", "s3_niveles_riesgo.csv")):
+                      ("deciles", "s3_calibracion_deciles.csv"), ("levels", "s3_niveles_riesgo.csv"),
+                      ("cal_check", "s3_verificacion_calibracion_final.csv")):
         results[key].to_csv(reports / name, index=False, encoding="utf-8")
         written.append(reports / name)
 
@@ -249,6 +288,12 @@ def save_results(results: dict, config: dict) -> list:
             "metodo": "Platt", "formula": "p_cal = sigmoid(a * logit(p) + b)", "a": a, "b": b, "ajustada_en": "validacion",
             "por_que": "Dos parámetros (validación de 3 vintages), estrictamente creciente (conserva orden, AUC y monotonía) y sin escalones.",
             "obs_pred_modelo_final_en_muestra": results["final_obs_pred"],
+            "modelo_final": "Reutiliza a y b del modelo de evaluación (no queda un conjunto apartado para recalibrar).",
+            "verificacion_modelo_final": {
+                "metodo": "Mismo procedimiento con corte más temprano: evaluación hasta antes de las 3 últimas vintages de entrenamiento, Platt en esas 3, final con todo entrenamiento, medido en validación.",
+                "corte": results["cal_check"].attrs["corte"],
+                "resultado": results["cal_check"].drop(columns="distancia_a_1").to_dict(orient="records"),
+            },
         },
         "umbrales_riesgo": {
             **results["thresholds"],
@@ -362,6 +407,10 @@ def main() -> int:
     print(f"  Umbrales de riesgo (entrenamiento): P50 {t['p50']:.4f}  P80 {t['p80']:.4f}  P95 {t['p95']:.4f}")
     for _, row in results["levels"].iterrows():
         print(f"    {row['nivel']:8s} observada {row['tasa_observada']:.4f}  predicha {row['tasa_predicha']:.4f}  ({int(row['cuentas_expuestas']):,} cuentas)")
+    print(f"Verificación de la calibración del modelo final (corte {results['cal_check'].attrs['corte']}, medida en validación):")
+    for _, row in results["cal_check"].iterrows():
+        print(f"  {row['opcion']:42s} obs/pred {row['obs_pred']:.4f}  log loss {row['log_loss']:.6f}  AUC {row['auc']:.5f}")
+    print(f"  Modelo final en muestra con la calibración reutilizada: obs/pred {results['final_obs_pred']:.4f}")
     print("Criterios en prueba:")
     for k, v in results["checks"].items():
         print(f"  [{'ok' if v else 'NO'}] {k}")

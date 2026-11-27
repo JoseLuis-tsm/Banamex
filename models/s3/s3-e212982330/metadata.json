@@ -1,7 +1,7 @@
 {
   "salida": "s3",
   "version": "s3-e212982330",
-  "fecha": "2026-11-27T02:43:37+00:00",
+  "fecha": "2026-11-27T03:04:26+00:00",
   "versiones_librerias": {
     "python": "3.12.6",
     "numpy": "2.2.6",
@@ -172,7 +172,35 @@
     "b": 0.0046726947754277765,
     "ajustada_en": "validacion",
     "por_que": "Dos parámetros (validación de 3 vintages), estrictamente creciente (conserva orden, AUC y monotonía) y sin escalones.",
-    "obs_pred_modelo_final_en_muestra": 0.9969476739246325
+    "obs_pred_modelo_final_en_muestra": 0.9969476739246325,
+    "modelo_final": "Reutiliza a y b del modelo de evaluación (no queda un conjunto apartado para recalibrar).",
+    "verificacion_modelo_final": {
+      "metodo": "Mismo procedimiento con corte más temprano: evaluación hasta antes de las 3 últimas vintages de entrenamiento, Platt en esas 3, final con todo entrenamiento, medido en validación.",
+      "corte": 202506,
+      "resultado": [
+        {
+          "opcion": "sin calibrar",
+          "obs_pred": 1.0030239862023935,
+          "log_loss": 0.27119583148816934,
+          "auc": 0.639239773120648,
+          "brier": 0.07271798770820105
+        },
+        {
+          "opcion": "reutilizar Platt del modelo de evaluación",
+          "obs_pred": 0.9994916676166045,
+          "log_loss": 0.27119590848871944,
+          "auc": 0.639239773120648,
+          "brier": 0.07271828754379245
+        },
+        {
+          "opcion": "recalibrar en muestra",
+          "obs_pred": 1.0027627585624868,
+          "log_loss": 0.2711960084937472,
+          "auc": 0.639239773120648,
+          "brier": 0.07271815563615458
+        }
+      ]
+    }
   },
   "umbrales_riesgo": {
     "p50": 0.06467574540263868,
