@@ -198,7 +198,7 @@ Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba,
   - Hace: función `S2 = cuentas planeadas × S1` en `src/`, con prueba (resultado exacto).
   - Entra → sale: S1 y cuentas planeadas → monto total.
   - Listo cuando: la prueba confirma que S2 es exactamente cuentas planeadas por S1.
-- [ ] **`04_s3_linea_base.py`**
+- [x] **`04_s3_linea_base.py`**
   - Hace: tasa ponderada por score y producto; GLM binomial (cada fila aporta tantos eventos como cuentas en Over30 y tantos no eventos como cuentas expuestas restantes); AUC, KS, Gini, log loss y Brier ponderados; calibración por deciles.
   - Entra → sale: matrices de S3 → métricas en `reports/`.
   - Listo cuando: las métricas de ambas líneas base quedan guardadas.
