@@ -294,7 +294,7 @@ Estos comandos además están **bloqueados técnicamente** en `.claude/settings.
 
 **Confirmadas**
 - Los datos están en `data/raw/base_cards_sintetica.csv`.
-- `OVER30ACCTS` y `REVENUE` son acumulados.
+- `OVER30ACCTS` y `REVENUE` son acumulados. En el diccionario, "en el mes de información de performance MOB" significa *observado al corte de ese MOB* (acumulado hasta ese MOB), no *solo lo ocurrido en ese mes*. Por eso S3 se lee directamente en MOB = 6.
 - El pipeline es de scripts `.py`; no hay notebooks.
 - Python 3.10 con pip, UTF-8; solo las librerías del plan; todo local; Docker es opcional.
 - Luis: datos, modelos, SHAP, evidencia y RAG. Ernesto: el agente.

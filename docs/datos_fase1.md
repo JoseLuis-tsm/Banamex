@@ -52,6 +52,8 @@ La evidencia es cuántas veces sube, baja o se queda igual cada columna al pasar
 | `ENRACCTS`, `ENRAMTS`, `EXPENSES_ECM_VAR`, `EXPENSES_TOTAL` | > 0% | > 0% | Del mes |
 | `EXPENSES_ACQ` | — | — | Solo en MOB = 0 |
 
+Lectura del diccionario (confirmada por Luis): en `OVER30ACCTS`, "en el mes de información de performance MOB" significa *acumulado hasta ese MOB*. Por eso S3 toma el valor de MOB = 6 sin sumar meses. Con datos reales, el aviso `acumulada_baja` del validador detectaría si una cohorte no lo cumple.
+
 Consecuencia: `ACCOUNTS` es el número de cuentas colocadas y no cambia con el MOB, así que las cuentas se cuentan en MOB = 0.
 
 ## 6. Población de `REVENUE` y `EXPENSES_TOTAL`
