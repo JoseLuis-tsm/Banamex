@@ -194,7 +194,7 @@ Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba,
   - Hace: XGBoost sobre el logaritmo de la línea, peso = `ACCOUNTS`, árboles poco profundos; Optuna (50 pruebas) con parada temprana (50 rondas) y semilla 42, sobre validación; mismas métricas contra la línea base y reporte por estrategia; guarda modelo y `metadata.json` (`src/models/registry.py`).
   - Entra → sale: matrices de S1 → `models/s1/<versión>/` y `models/s1/actual.json`.
   - Listo cuando: **el MAE de prueba es al menos 10% menor que el de la línea base simple**; si no, no se publica y me avisas.
-- [ ] **`03_s2_monto_total.py`**
+- [x] **`03_s2_monto_total.py`**
   - Hace: función `S2 = cuentas planeadas × S1` en `src/`, con prueba (resultado exacto).
   - Entra → sale: S1 y cuentas planeadas → monto total.
   - Listo cuando: la prueba confirma que S2 es exactamente cuentas planeadas por S1.

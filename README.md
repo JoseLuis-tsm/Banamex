@@ -13,7 +13,7 @@ Plataforma **local** que, para un perfil de adquisición de tarjetas de crédito
 
 Cada resultado se explica con SHAP y se puede consultar en lenguaje natural con un asistente (RAG + Ollama) que **solo redacta sobre cifras ya calculadas**. No aprueba ni rechaza créditos, no predice por cliente individual y no afirma causalidad. Los datos del proyecto son una **base sintética**.
 
-**Estado:** infraestructura lista (Fases 0 y 0b) y Fase 1 (datos) terminada, pendiente de revisión: base validada, datasets de S1 y S3 generados y decisiones de datos en [docs/datos_fase1.md](docs/datos_fase1.md). Siguen la Fase 2 (modelos, Luis) y la Fase 5B (agente con ejemplos simulados, Ernesto). El avance detallado está en [PLAN.md](PLAN.md) y las reglas del proyecto en [CLAUDE.md](CLAUDE.md).
+**Estado:** infraestructura lista (Fases 0 y 0b) y Fase 1 (datos) terminada, pendiente de revisión: base validada, datasets de S1 y S3 generados y decisiones de datos en [docs/datos_fase1.md](docs/datos_fase1.md). Fase 2 (modelos) en curso: S3 publicado; S1 no cumplió su criterio de publicación y está pendiente de decisión (ver [docs/fichas/](docs/fichas/)). En paralelo, la Fase 5B (agente, Ernesto). El avance detallado está en [PLAN.md](PLAN.md) y las reglas del proyecto en [CLAUDE.md](CLAUDE.md).
 
 ---
 
@@ -168,7 +168,7 @@ Siempre desde la **raíz del repo** y con el entorno activado.
 
 ## 7. Tabla de scripts
 
-Los scripts de la Fase 1 ya existen; los demás son los planeados en [PLAN.md](PLAN.md) y la tabla se actualiza al agregar cada uno.
+Los scripts de las Fases 1 y 2 ya existen; los demás son los planeados en [PLAN.md](PLAN.md) y la tabla se actualiza al agregar cada uno.
 
 | Script | Qué hace | Lee | Escribe | Quién |
 |---|---|---|---|---|
@@ -179,7 +179,13 @@ Los scripts de la Fase 1 ya existen; los demás son los planeados en [PLAN.md](P
 | `01_datos/03_exploracion_cohortes.py` | Cuentas por vintage, estrategia y segmento; producto, canal, score y edad; filas por MOB | `base_estandar.csv` | `reports/01_datos/exploracion_*.csv` y `graficas/exploracion_*.html` | Luis |
 | `01_datos/04_madurez_y_curvas.py` | Madurez a 6 meses, curvas de Over30, `OVER30ACCTS > ENRACCTS` en MOB 6 y datasets de modelado | `base_estandar.csv` | `data/processed/s1_dataset.csv`, `s3_dataset.csv`; `reports/01_datos/madurez_vintages.csv`, `curvas_*.csv`, `over30_mayor_enr_mob6.csv` y gráficas | Luis |
 | `01_datos/05_balance_entre_estrategias.py` | Balance de perfiles r.Reca champ vs. DARIA 1.6 en 202511–202607, asignación por vintage y estrategias evaluables | `base_estandar.csv` | `reports/01_datos/balance_estrategias.csv`, `balance_asignacion_por_vintage.csv`, `estrategias_evaluables.csv` y gráficas | Luis |
-| `02_modelos_prediccion/00` a `06` | Variables, partición, líneas base y XGBoost de S1 y S3, S2, resumen | Datasets de modelado | `models/s1/`, `models/s3/`, `reports/`, `docs/fichas/` | Luis |
+| `02_modelos_prediccion/00_variables_y_particion.py` | Variables de entrada (`src/features/`), partición temporal por vintage y prueba de fuga | `s1_dataset.csv`, `s3_dataset.csv` | `data/processed/s1_modelado.csv`, `s3_modelado.csv`; `reports/02_modelos_prediccion/particion.csv` | Luis |
+| `02_modelos_prediccion/01_s1_linea_base.py` | Líneas base de S1: media por producto × score y GLM Gamma | `s1_modelado.csv` | `reports/02_modelos_prediccion/s1_linea_base_*.csv` | Luis |
+| `02_modelos_prediccion/02_s1_xgboost.py` | XGBoost de S1 (log de la línea, Optuna); publica solo si el MAE de prueba es ≥ 10% menor que el de la base simple (si no, sale con código 1) | `s1_modelado.csv`, métricas de la base | `models/s1/<versión>/`, `models/s1/actual.json`, `reports/02_modelos_prediccion/s1_*.csv` y gráficas | Luis |
+| `02_modelos_prediccion/03_s2_monto_total.py` | S2 = cuentas planeadas × S1 (`src/models/s2.py`), con comprobación de exactitud; requiere S1 publicado | Modelo S1, `s1_modelado.csv` | `reports/02_modelos_prediccion/s2_monto_total.csv` | Luis |
+| `02_modelos_prediccion/04_s3_linea_base.py` | Líneas base de S3: tasa por score × producto y GLM binomial | `s3_modelado.csv` | `reports/02_modelos_prediccion/s3_linea_base_*.csv` | Luis |
+| `02_modelos_prediccion/05_s3_xgboost.py` | XGBoost de S3 (etiqueta fraccional, monótono en el score, Optuna, Platt en validación); publica si cumple los criterios | `s3_modelado.csv`, métricas de la base | `models/s3/<versión>/`, `models/s3/actual.json`, `reports/02_modelos_prediccion/s3_*.csv` y gráficas | Luis |
+| `02_modelos_prediccion/06_resumen_modelos.py` | Tabla resumen y fichas de S1 y S3, generadas desde `metadata.json` | Metadata y comparaciones | `reports/02_modelos_prediccion/resumen_modelos.csv`, `docs/fichas/ficha_s1.md`, `ficha_s3.md` | Luis |
 | `03_estrategia_y_explicabilidad/01` a `10` | S4, reglas de consistencia y SHAP | Modelos y datasets | `reports/`, `src/strategy/`, `src/consistency/`, `src/explain/` | Luis |
 | `04_app_api/run_api.py`, `run_app.py` | Lanzan la API y la interfaz | Modelos | — | Ambos |
 | `05a_evidencia_rag/01` a `07` | Base documental, índice Chroma y evidencia C1–C7 | `data/knowledge/`, modelos | `data/chroma/`, `src/evidence/` | Luis |

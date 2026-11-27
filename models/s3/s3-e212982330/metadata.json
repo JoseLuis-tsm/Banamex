@@ -1,7 +1,7 @@
 {
   "salida": "s3",
   "version": "s3-e212982330",
-  "fecha": "2026-11-27T02:39:40+00:00",
+  "fecha": "2026-11-27T02:43:37+00:00",
   "versiones_librerias": {
     "python": "3.12.6",
     "numpy": "2.2.6",
