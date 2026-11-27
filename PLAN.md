@@ -157,7 +157,7 @@ Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos apr
   - Hace: carga `data/raw/base_cards_sintetica.csv` en UTF-8 con tipos económicos (categóricos donde convenga); imprime forma, tipos, nulos y memoria; detecta si las columnas traen alias `dummiN` o nombres reales y renombra a los reales; lee el diccionario y construye `src/data/catalog.py` (catálogos de producto, canal, edad, segmentos y scores por familia, estrategia según vintage, rangos mínimo y máximo); revisa espacios al final en las categorías.
   - Entra → sale: CSV de datos y diccionario → `data/contracts/column_map.json`, `src/data/catalog.py`, `src/data/load.py`, `data/processed/base_estandar.csv`.
   - Listo cuando: el CSV se carga con nombres estándar, queda documentado cuál formato traía y qué hacer con `MOB` si no tiene alias, y `catalog.py` tiene pruebas.
-- [ ] **`02_validacion_contrato.py`**
+- [x] **`02_validacion_contrato.py`**
   - Hace: implementa `src/data/validation.py` con pandas puro (reglas bloqueantes y avisos de `CLAUDE.md` §5); comprueba con evidencia cuáles columnas de resultado son acumuladas (`OVER30ACCTS` y `REVENUE` ya están confirmadas) y a qué población se refieren `REVENUE` y `EXPENSES_TOTAL`.
   - Entra → sale: `data/processed/base_estandar.csv` → `reports/01_datos/validacion.csv` (regla, fila, qué falló, qué hacer) y `reports/01_datos/columnas_acumuladas.csv`.
   - Listo cuando: el validador pasa con el dataset real, falla con casos rotos a propósito (pruebas en `tests/`), sale con error ante fallas bloqueantes y las decisiones quedan documentadas.
