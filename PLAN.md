@@ -153,7 +153,7 @@ Entrada: pregunta en texto y, si aplica, perfil o lote en sesión. Salida: respu
 
 Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos aprobado.
 
-- [ ] **`01_carga_y_diccionario.py`**
+- [x] **`01_carga_y_diccionario.py`**
   - Hace: carga `data/raw/base_cards_sintetica.csv` en UTF-8 con tipos económicos (categóricos donde convenga); imprime forma, tipos, nulos y memoria; detecta si las columnas traen alias `dummiN` o nombres reales y renombra a los reales; lee el diccionario y construye `src/data/catalog.py` (catálogos de producto, canal, edad, segmentos y scores por familia, estrategia según vintage, rangos mínimo y máximo); revisa espacios al final en las categorías.
   - Entra → sale: CSV de datos y diccionario → `data/contracts/column_map.json`, `src/data/catalog.py`, `src/data/load.py`, `data/processed/base_estandar.csv`.
   - Listo cuando: el CSV se carga con nombres estándar, queda documentado cuál formato traía y qué hacer con `MOB` si no tiene alias, y `catalog.py` tiene pruebas.
