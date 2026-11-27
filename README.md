@@ -13,7 +13,7 @@ Plataforma **local** que, para un perfil de adquisición de tarjetas de crédito
 
 Cada resultado se explica con SHAP y se puede consultar en lenguaje natural con un asistente (RAG + Ollama) que **solo redacta sobre cifras ya calculadas**. No aprueba ni rechaza créditos, no predice por cliente individual y no afirma causalidad. Los datos del proyecto son una **base sintética**.
 
-**Estado:** infraestructura lista (Fases 0 y 0b): estructura del repo, entorno, configuración, plantilla de scripts, contratos entre frentes y ejemplos simulados de evidencia. Siguen la Fase 1 (datos, Luis) y la Fase 5B (agente con ejemplos simulados, Ernesto). El avance detallado está en [PLAN.md](PLAN.md) y las reglas del proyecto en [CLAUDE.md](CLAUDE.md).
+**Estado:** infraestructura lista (Fases 0 y 0b) y Fase 1 (datos) terminada, pendiente de revisión: base validada, datasets de S1 y S3 generados y decisiones de datos en [docs/datos_fase1.md](docs/datos_fase1.md). Siguen la Fase 2 (modelos, Luis) y la Fase 5B (agente con ejemplos simulados, Ernesto). El avance detallado está en [PLAN.md](PLAN.md) y las reglas del proyecto en [CLAUDE.md](CLAUDE.md).
 
 ---
 
@@ -107,7 +107,7 @@ python -m pytest
 | `scripts/04_app_api/`, `06_cierre/` | Lanzadores de API y app; cierre | Ambos | Sí |
 | `src/data`, `features`, `models`, `strategy`, `consistency`, `explain`, `evidence`, `rag` | Lógica de datos, modelos y evidencia | Luis | Sí |
 | `src/assistant/` | Lógica del agente | Ernesto | Sí |
-| `src/utils/` | Configuración y semilla | Ambos | Sí |
+| `src/utils/` | Configuración, semilla y estilo común de gráficas | Ambos | Sí |
 | `models/` | Modelos entrenados | Luis | Solo `metadata.json` y `actual.json` |
 | `reports/` | Tablas (CSV) y gráficas (HTML) generadas | Los scripts | **No** |
 | `api/`, `app/` | Servicios FastAPI e interfaz Streamlit | Ambos | Sí |
@@ -168,17 +168,17 @@ Siempre desde la **raíz del repo** y con el entorno activado.
 
 ## 7. Tabla de scripts
 
-Los scripts de las fases todavía no existen; esta tabla lista los planeados en [PLAN.md](PLAN.md) y se actualiza al agregar cada uno.
+Los scripts de la Fase 1 ya existen; los demás son los planeados en [PLAN.md](PLAN.md) y la tabla se actualiza al agregar cada uno.
 
 | Script | Qué hace | Lee | Escribe | Quién |
 |---|---|---|---|---|
 | `scripts/run_fase.py` | Corre en orden los scripts de una fase | `scripts/<fase>/` | Resumen en la terminal | Ambos |
 | `scripts/_plantilla.py` | Plantilla para scripts nuevos | — | — | Ambos |
-| `01_datos/01_carga_y_diccionario.py` | Carga el CSV, estandariza columnas, catálogos | CSV de datos, diccionario | `column_map.json`, `base_estandar.csv` | Luis |
-| `01_datos/02_validacion_contrato.py` | Valida el contrato de datos | `base_estandar.csv` | `reports/01_datos/validacion.csv` | Luis |
-| `01_datos/03_exploracion_cohortes.py` | Descripción de cohortes | `base_estandar.csv` | Tablas y gráficas en `reports/01_datos/` | Luis |
-| `01_datos/04_madurez_y_curvas.py` | Madurez a 6 meses y datasets de modelado | `base_estandar.csv` | `s1_dataset.csv`, `s3_dataset.csv` | Luis |
-| `01_datos/05_balance_entre_estrategias.py` | Balance de perfiles en la ventana aleatoria | `base_estandar.csv` | `reports/01_datos/balance_estrategias.csv` | Luis |
+| `01_datos/01_carga_y_diccionario.py` | Carga el CSV (nombres reales o alias `dummiN`), quita espacios a las categorías y verifica `src/data/catalog.py` contra el diccionario | CSV de datos, diccionario | `data/contracts/column_map.json`, `data/processed/base_estandar.csv`, `reports/01_datos/carga_*.csv` | Luis |
+| `01_datos/02_validacion_contrato.py` | Valida el contrato de datos (sale con código 1 si hay fallas bloqueantes); comprueba qué columnas son acumuladas | `base_estandar.csv` (o `--entrada`) | `reports/01_datos/validacion.csv`, `columnas_acumuladas.csv`, `poblacion_columnas.csv` | Luis |
+| `01_datos/03_exploracion_cohortes.py` | Cuentas por vintage, estrategia y segmento; producto, canal, score y edad; filas por MOB | `base_estandar.csv` | `reports/01_datos/exploracion_*.csv` y `graficas/exploracion_*.html` | Luis |
+| `01_datos/04_madurez_y_curvas.py` | Madurez a 6 meses, curvas de Over30, `OVER30ACCTS > ENRACCTS` en MOB 6 y datasets de modelado | `base_estandar.csv` | `data/processed/s1_dataset.csv`, `s3_dataset.csv`; `reports/01_datos/madurez_vintages.csv`, `curvas_*.csv`, `over30_mayor_enr_mob6.csv` y gráficas | Luis |
+| `01_datos/05_balance_entre_estrategias.py` | Balance de perfiles r.Reca champ vs. DARIA 1.6 en 202511–202607, asignación por vintage y estrategias evaluables | `base_estandar.csv` | `reports/01_datos/balance_estrategias.csv`, `balance_asignacion_por_vintage.csv`, `estrategias_evaluables.csv` y gráficas | Luis |
 | `02_modelos_prediccion/00` a `06` | Variables, partición, líneas base y XGBoost de S1 y S3, S2, resumen | Datasets de modelado | `models/s1/`, `models/s3/`, `reports/`, `docs/fichas/` | Luis |
 | `03_estrategia_y_explicabilidad/01` a `10` | S4, reglas de consistencia y SHAP | Modelos y datasets | `reports/`, `src/strategy/`, `src/consistency/`, `src/explain/` | Luis |
 | `04_app_api/run_api.py`, `run_app.py` | Lanzan la API y la interfaz | Modelos | — | Ambos |
