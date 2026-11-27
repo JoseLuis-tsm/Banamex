@@ -229,11 +229,12 @@ Objetivo: S4 con intervalos, reglas de consistencia y explicaciones en tres nive
   - Hace: método 1. Diferencia observada de la tasa de Over30 entre estrategias, con intervalo por *bootstrap* sobre cohortes (semilla 42).
   - Entra → sale: `s4_ventana.csv` → diferencias e intervalos por perfil en `reports/03_.../`.
   - Listo cuando: cada perfil tiene diferencia e intervalo, y el *bootstrap* es reproducible.
-- [ ] **`03_s4_prediccion_escenarios.py`**
+- [x] **`03_s4_prediccion_escenarios.py`**
   - Hace: método 2. Predice con S3 el mismo perfil bajo cada estrategia y calcula la diferencia (con intervalo).
+    *Decisión:* se predicen las cohortes reales de cada estrategia y se promedian ponderando por ENRACCTS, con un S3 reentrenado **sin la vintage que se predice** (5 vintages en la ventana, mismos hiperparámetros, rondas y calibración del publicado), para que la concordancia no salga inflada. El intervalo bootstrap del método 2 refleja solo la variación entre cohortes; la decisión usa el del método 1.
   - Entra → sale: modelo S3 y perfiles → diferencias predichas.
   - Listo cuando: cada perfil tiene su diferencia predicha bajo ambas estrategias.
-- [ ] **`04_s4_sugerencia_y_validacion.py`**
+- [x] **`04_s4_sugerencia_y_validacion.py`**
   - Hace: combina ambos métodos con la regla de decisión: se sugiere una estrategia **solo si el intervalo excluye cero y los dos métodos coinciden en el signo**; si no, "Sin diferencia concluyente". DARIA 2.0 sale como *no evaluable en riesgo*. Calcula la concordancia entre métodos y guarda la función en `src/strategy/`.
   - Entra → sale: salidas de los dos métodos → `reports/` con la sugerencia por perfil.
   - Listo cuando: **el signo coincide en al menos 70% de los perfiles con diferencia concluyente**, con pruebas de la regla de decisión.
