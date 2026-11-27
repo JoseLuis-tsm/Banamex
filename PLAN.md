@@ -202,7 +202,7 @@ Objetivo: S1 y S3 con línea base y XGBoost, comparados en validación y prueba,
   - Hace: tasa ponderada por score y producto; GLM binomial (cada fila aporta tantos eventos como cuentas en Over30 y tantos no eventos como cuentas expuestas restantes); AUC, KS, Gini, log loss y Brier ponderados; calibración por deciles.
   - Entra → sale: matrices de S3 → métricas en `reports/`.
   - Listo cuando: las métricas de ambas líneas base quedan guardadas.
-- [ ] **`05_s3_xgboost.py`**
+- [x] **`05_s3_xgboost.py`**
   - Hace: XGBoost con etiqueta fraccional, peso = `ENRACCTS`, restricción monótona decreciente en el score; Optuna y parada temprana como en S1; calibración ajustada **solo en validación** (por ejemplo, regresión isotónica o de Platt con scikit-learn; documenta cuál y por qué); métricas contra la línea base, calibración por deciles y reporte por estrategia y por rango de edad; guarda modelo y `metadata.json`.
   - Entra → sale: matrices de S3 → `models/s3/<versión>/`, `models/s3/actual.json`.
   - Listo cuando: **no es peor que el GLM, la razón observado/predicho está entre 0.95 y 1.05 y la tasa observada crece con el nivel de riesgo**; si no, no se publica y me avisas.
