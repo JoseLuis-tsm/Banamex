@@ -3,7 +3,7 @@
 Todas las vistas llevan la nota fija de no causalidad y la de escala (add_notes()).
 """
 
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -19,25 +19,27 @@ DOWN_COLOR = CATEGORICAL[0]  # azul: la contribución baja la tasa estimada
 NUMERIC_VALUES = {"AGE_TAG": "EDAD_ORDINAL", "SCORE_TAG": "SCORE_POSICION", "BOOKING_MONTH": "MES_BOOKING"}
 
 
-def add_notes(fig: go.Figure) -> go.Figure:
+def add_notes(fig: go.Figure, scale_note: str = SCALE_NOTE) -> go.Figure:
     """Agrega al pie de la gráfica la nota de no causalidad y la de escala."""
-    fig.add_annotation(text=NOTE + "<br>" + SCALE_NOTE, xref="paper", yref="paper", x=0, y=-0.22,
+    fig.add_annotation(text=NOTE + "<br>" + scale_note, xref="paper", yref="paper", x=0, y=-0.22,
                        showarrow=False, align="left", font={"size": 11, "color": TEXT_SECONDARY})
     fig.update_layout(margin={"b": 140})
     return fig
 
 
-def importance_bars(importance: pd.DataFrame, title: str) -> go.Figure:
+def importance_bars(importance: pd.DataFrame, title: str, x_label: str = "Media de |SHAP| (escala logit)",
+                    scale_note: str = SCALE_NOTE) -> go.Figure:
     """Barras horizontales: media |SHAP| por variable original (mayor arriba)."""
     t = importance.iloc[::-1]
     fig = go.Figure(go.Bar(x=t["importancia"], y=t["etiqueta"], orientation="h", marker_color=CATEGORICAL[0], name="Importancia",
                            hovertemplate="%{y}: %{x:.4f}<extra></extra>"))
     fig.update_layout(showlegend=False, height=480)
-    return add_notes(style(fig, title, "Media de |SHAP| (escala logit)", ""))
+    return add_notes(style(fig, title, x_label, ""), scale_note)
 
 
 def beeswarm(grouped: pd.DataFrame, features: pd.DataFrame, values: pd.DataFrame, title: str,
-             order: List[str], max_points: int = 3000, seed: int = 42) -> go.Figure:
+             order: List[str], max_points: int = 3000, seed: int = 42,
+             x_label: str = "Contribución SHAP (escala logit; positiva = sube la tasa estimada)", scale_note: str = SCALE_NOTE) -> go.Figure:
     """Beeswarm: un punto por cohorte y variable; x = contribución SHAP, y = variable (con dispersión).
 
     Para edad, score y mes el color muestra el valor de la variable (claro = bajo, oscuro =
@@ -61,23 +63,29 @@ def beeswarm(grouped: pd.DataFrame, features: pd.DataFrame, values: pd.DataFrame
     fig.add_vline(x=0, line_color=TEXT_SECONDARY, line_width=1)
     fig.update_yaxes(tickvals=list(range(len(order))), ticktext=[VARIABLE_LABELS[v] for v in order[::-1]])
     fig.update_layout(height=520)
-    return add_notes(style(fig, title, "Contribución SHAP (escala logit; positiva = sube la tasa estimada)", ""))
+    return add_notes(style(fig, title, x_label, ""), scale_note)
 
 
-def waterfall(contrib: pd.Series, base: float, output: float, labels: pd.Series, title: str) -> go.Figure:
-    """Cascada de un perfil: valor base → contribución de cada variable → salida (logit)."""
+def waterfall(contrib: pd.Series, base: float, output: float, labels: pd.Series, title: str,
+              y_label: str = "Logit de la tasa sin calibrar", scale_note: str = SCALE_NOTE,
+              base_label: str = "Valor base", output_label: str = "Salida del modelo", texts: Optional[List[str]] = None) -> go.Figure:
+    """Cascada de un perfil: valor base → contribución de cada variable → salida.
+
+    texts: etiquetas de cada barra (base, variables en orden de |contribución|, salida); por
+    omisión, la contribución con signo.
+    """
     order = contrib.abs().sort_values(ascending=False).index
     text = [f"{VARIABLE_LABELS[v]} = {labels[v]}" for v in order]
     fig = go.Figure(go.Waterfall(
         orientation="v", measure=["absolute"] + ["relative"] * len(order) + ["total"],
-        x=["Valor base"] + text + ["Salida del modelo"], y=[base] + [contrib[v] for v in order] + [output],
+        x=[base_label] + text + [output_label], y=[base] + [contrib[v] for v in order] + [output],
         increasing={"marker": {"color": UP_COLOR}}, decreasing={"marker": {"color": DOWN_COLOR}},
         totals={"marker": {"color": "#8a8984"}}, connector={"line": {"color": "#d8d7d2"}},
-        texttemplate="%{delta:+.3f}", hovertemplate="%{x}<br>%{y:+.4f}<extra></extra>", name="SHAP",
+        **({"text": texts, "textposition": "outside"} if texts is not None else {"texttemplate": "%{delta:+.3f}"}), hovertemplate="%{x}<br>%{y:+.4f}<extra></extra>", name="SHAP",
     ))
     fig.update_layout(showlegend=False, height=560)
     fig.update_xaxes(tickangle=-30)
-    return add_notes(style(fig, title, "", "Logit de la tasa sin calibrar"))
+    return add_notes(style(fig, title, "", y_label), scale_note)
 
 
 __all__ = ["add_notes", "beeswarm", "importance_bars", "waterfall", "VARIABLES"]
