@@ -149,7 +149,7 @@ Entrada: pregunta en texto y, si aplica, perfil o lote en sesión. Salida: respu
 
 ---
 
-## Fase 1 — Datos `[L]` (`scripts/01_datos/`)
+## Fase 1 — Datos `[L]` (`scripts/01_datos/`) ✅
 
 Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos aprobado.
 
