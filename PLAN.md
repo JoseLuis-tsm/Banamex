@@ -221,11 +221,11 @@ Objetivo: S4 con intervalos, reglas de consistencia y explicaciones en tres nive
 
 **3A. Estrategia (S4)**
 
-- [ ] **`01_ventana_aleatoria.py`**
+- [x] **`01_ventana_aleatoria.py`**
   - Hace: toma solo la ventana con asignación aleatoria (202511–202607), usa solo cohortes maduras a H = 6 y arma una tabla por perfil con r.Reca champ y DARIA 1.6; excluye DARIA 2.0. Compara solo en el **soporte común** (perfiles con cuentas en ambas estrategias; por ejemplo, DARIA 1.6 no tiene Costco ni Beyond); los perfiles fuera de él salen como "sin evidencia".
   - Entra → sale: `s3_dataset.csv` y el balance de la Fase 1 → `data/processed/s4_ventana.csv`.
   - Listo cuando: el balance de perfiles entre estrategias queda verificado y documentado.
-- [ ] **`02_s4_observado_bootstrap.py`**
+- [x] **`02_s4_observado_bootstrap.py`**
   - Hace: método 1. Diferencia observada de la tasa de Over30 entre estrategias, con intervalo por *bootstrap* sobre cohortes (semilla 42).
   - Entra → sale: `s4_ventana.csv` → diferencias e intervalos por perfil en `reports/03_.../`.
   - Listo cuando: cada perfil tiene diferencia e intervalo, y el *bootstrap* es reproducible.
