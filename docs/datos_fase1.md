@@ -35,7 +35,7 @@
   - `NCLAMTS = GCLAMTS − RECOVERYAMTS` se cumple en todas las filas; la diferencia máxima es del orden de 1e-10.
   - `EXPENSES_TOTAL` es exactamente la suma de sus tres componentes.
   - `EXPENSES_ACQ` vale 0 en todo MOB distinto de 0.
-- **Regla agregada: `valor_nulo` (bloqueante).** No está en la lista de CLAUDE.md §5, pero ninguna columna del contrato admite vacíos y el rango del diccionario no se puede comprobar sobre un nulo. *Confirmar.*
+- **Regla agregada: `valor_nulo` (bloqueante; confirmada por Luis).** Ninguna columna del contrato admite vacíos y el rango del diccionario no se puede comprobar sobre un nulo. Es una alarma: detiene la carga para que alguien revise la fila; no rellena ni descarta nada. Ya está en CLAUDE.md §5.
 - **Regla extendida: valores no enteros.** Para los conteos y la línea (`VINTAGE`, `MOB`, `ACCOUNTS`, `CREDITLINESAMTS`, `ENRACCTS`, `OVER30ACCTS`), un valor no entero cuenta como "fuera de rango", porque el diccionario dice "número entero".
 - **Tolerancia de las igualdades:** |a − b| ≤ 1e-6 + 1e-9·|b|.
 
@@ -59,7 +59,7 @@ Consecuencia: `ACCOUNTS` es el número de cuentas colocadas y no cambia con el M
 - **Hallazgo:**
   - El diccionario describe ambas columnas como "de las cuentas que se fueron a Over30". Sin embargo, en las 356,290 filas con `OVER30ACCTS = 0`, el 49.78% tiene `REVENUE > 0` y el 100% tiene `EXPENSES_TOTAL > 0`. Como `OVER30ACCTS` es acumulado, esas filas no tienen ninguna cuenta en Over30.
   - Además, `EXPENSES_TOTAL` es exactamente `ACQ + VAR + FIX` en el 100% de las filas, y la descripción de esos tres componentes no los limita a Over30.
-- **Decisión propuesta:** ambas columnas se refieren a **todas las cuentas de la cohorte**. La frase del diccionario parece un error de copia. No afecta S1 ni S3; importa si en la Fase 3 se usan ingresos o gastos para S4. *Confirmar.*
+- **Decisión (Luis):** no se reinterpreta. Se conserva la definición del diccionario y la discrepancia queda registrada como observación: puede ser una excepción o un caso extraordinario de los datos. No afecta S1 ni S3; si más adelante se usan ingresos o gastos, se vuelve a revisar.
 
 ## 7. Denominador de S3 (pregunta abierta 4)
 
@@ -102,11 +102,10 @@ Consecuencia: `ACCOUNTS` es el número de cuentas colocadas y no cambia con el M
 - **`GCLAMTS` ya es positivo en MOB = 1 en el 100% de las cohortes**, aunque solo el 2.42% tiene alguna cuenta en Over30 en ese mes. En datos reales la pérdida bruta llega después de la mora. Esto no afecta S1 ni S3; hay que tenerlo en cuenta si S4 usa pérdidas.
 - `ACCOUNTS` va de 4 a 881 por fila: no hay cohortes de menos de 4 cuentas.
 
-## 11. Puntos a decidir
+## 11. Decisiones tomadas en la revisión
 
-1. Confirmar la regla `valor_nulo` como bloqueante (§4).
-2. Confirmar que `REVENUE` y `EXPENSES_TOTAL` se refieren a todas las cuentas de la cohorte (§6).
-3. Para S4 (Fase 3), elegir cómo comparar con DARIA 1.6:
-   - restringir a los productos y canales que tienen las dos estrategias (soporte común, sin Costco ni Beyond), o
-   - reportar esos perfiles como "sin evidencia".
-4. Para la Fase 2, decidir si se mantiene la posición relativa del score como variable (está en CLAUDE.md §7). Como las escalas no son equivalentes entre familias, el modelo debería ver también la familia, que ya está prevista, para no mezclarlas.
+1. `valor_nulo` queda como regla bloqueante (§4).
+2. `REVENUE` y `EXPENSES_TOTAL` conservan la definición del diccionario; la discrepancia solo se documenta (§6).
+3. S4 compara r.Reca champ y DARIA 1.6 solo en el **soporte común**. Los perfiles sin cuentas en ambas estrategias, como Costco y Beyond, salen como "sin evidencia". Ya está en PLAN.md, Fase 3, `01_ventana_aleatoria.py`.
+4. Escala del score, `GCLAMTS` en MOB 1 y cohortes pequeñas de S3 (§8, §9, §10): se sigue el plan tal como está, sin cambios. Si aparecen problemas en la Fase 2, se regresa a esta fase.
+5. Ningún dato se descarta de la base. `data/processed/base_estandar.csv` conserva las 1,089,833 filas, y los conjuntos de modelado son subconjuntos derivados.

@@ -154,7 +154,7 @@ Las columnas de **resultado** solo construyen objetivos; **nunca son variables d
 
 El validador devuelve un reporte legible: qué falló, en qué fila y qué hacer. Sale con código de error si hay fallas bloqueantes.
 
-- *Bloquean la carga:* llave repetida; columna faltante; categoría fuera de catálogo; estrategia que no corresponde a su vintage; MOB mayor al posible para su vintage; valor fuera del rango del diccionario; `NCLAMTS ≠ GCLAMTS − RECOVERYAMTS`; `EXPENSES_TOTAL ≠ ACQ + VAR + FIX`; `EXPENSES_ACQ ≠ 0` con MOB ≠ 0. (Las igualdades se comparan con una tolerancia numérica pequeña.)
+- *Bloquean la carga:* llave repetida; columna faltante; valor nulo en una columna del contrato; categoría fuera de catálogo; estrategia que no corresponde a su vintage; MOB mayor al posible para su vintage; valor fuera del rango del diccionario; `NCLAMTS ≠ GCLAMTS − RECOVERYAMTS`; `EXPENSES_TOTAL ≠ ACQ + VAR + FIX`; `EXPENSES_ACQ ≠ 0` con MOB ≠ 0. (Las igualdades se comparan con una tolerancia numérica pequeña.)
 - *Solo avisan:* `OVER30ACCTS > ENRACCTS`; una columna acumulada (`OVER30ACCTS`, `REVENUE`) que baja al subir el MOB dentro de una cohorte; columnas no declaradas en el diccionario (se descartan).
 
 **Detalle del diccionario:** algunos valores de catálogo traen un espacio al final (por ejemplo `"Brands-NonPayroll-OffUs&LE "`, `"AAC Off Us Non-Payroll "`). Compara contra los datos y normaliza con `.str.strip()` si procede, documentando la decisión.
@@ -298,12 +298,16 @@ Estos comandos además están **bloqueados técnicamente** en `.claude/settings.
 - El pipeline es de scripts `.py`; no hay notebooks.
 - Python 3.10 con pip, UTF-8; solo las librerías del plan; todo local; Docker es opcional.
 - Luis: datos, modelos, SHAP, evidencia y RAG. Ernesto: el agente.
+- Un valor nulo en cualquier columna del contrato es falla bloqueante (no se rellena ni se descarta en silencio).
+- `REVENUE` y `EXPENSES_TOTAL` conservan la definición del diccionario; la discrepancia observada con los datos queda documentada en `docs/datos_fase1.md`, sin reinterpretarla.
+- S4 compara estrategias solo en el **soporte común** (perfiles con cuentas en ambas); fuera de él, "sin evidencia".
+- Ningún dato se descarta de la base: los conjuntos de modelado son subconjuntos derivados y la base completa queda disponible (incluido el RAG).
 
-**Por resolver con los datos (Fase 1)**
-1. ¿El CSV trae los alias `dummiN` o los nombres reales? (ver §5)
-2. ¿Qué columna es `MOB` si no tiene alias?
-3. ¿Qué otras columnas de resultado son acumuladas?
-4. ¿Con qué frecuencia `OVER30ACCTS > ENRACCTS` en MOB = 6? ¿Conviene `ACCOUNTS` como denominador de S3?
+**Resueltas con los datos (Fase 1; detalle en `docs/datos_fase1.md`)**
+1. El CSV trae los nombres reales (el cargador acepta también los alias `dummiN`).
+2. `MOB` es la columna llamada `MOB`.
+3. Acumuladas: `OVER30ACCTS`, `OVER30AMTS`, `GCLAMTS`, `NCLAMTS`, `RECOVERYAMTS` y `REVENUE`.
+4. `OVER30ACCTS > ENRACCTS` en MOB = 6 en 0 de 52,835 cohortes: se mantiene `ENRACCTS` como denominador de S3.
 
 **Por decidir en la Fase 5** (se preguntan al llegar): embeddings de Chroma local y definición exacta de "perfil fuera de dominio" y de "perfiles similares" para la confianza.
 
