@@ -52,8 +52,7 @@ def test_build_features_rechaza_valores_fuera_de_catalogo():
 
 def test_particion_temporal_coincide_con_la_config():
     v = pd.Series([202401, 202508, 202509, 202511, 202512, 202603, 202604, 202609])
-    assert list(assign_split(v, SPLIT, "test")) == [TRAIN, TRAIN, VALIDATION, VALIDATION, TEST, TEST, None, None] or \
-        list(assign_split(v, SPLIT, "test").fillna("-")) == [TRAIN, TRAIN, VALIDATION, VALIDATION, TEST, TEST, "-", "-"]
+    assert list(assign_split(v, SPLIT, "test").fillna("-")) == [TRAIN, TRAIN, VALIDATION, VALIDATION, TEST, TEST, "-", "-"]
     assert list(assign_split(v, SPLIT, "test_s1"))[-2:] == [TEST, TEST]
 
 
