@@ -161,7 +161,7 @@ Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos apr
   - Hace: implementa `src/data/validation.py` con pandas puro (reglas bloqueantes y avisos de `CLAUDE.md` §5); comprueba con evidencia cuáles columnas de resultado son acumuladas (`OVER30ACCTS` y `REVENUE` ya están confirmadas) y a qué población se refieren `REVENUE` y `EXPENSES_TOTAL`.
   - Entra → sale: `data/processed/base_estandar.csv` → `reports/01_datos/validacion.csv` (regla, fila, qué falló, qué hacer) y `reports/01_datos/columnas_acumuladas.csv`.
   - Listo cuando: el validador pasa con el dataset real, falla con casos rotos a propósito (pruebas en `tests/`), sale con error ante fallas bloqueantes y las decisiones quedan documentadas.
-- [ ] **`03_exploracion_cohortes.py`**
+- [x] **`03_exploracion_cohortes.py`**
   - Hace: cuentas por vintage, estrategia y segmento; participación de productos y canales; distribución de score y edad por familia; filas por MOB.
   - Entra → sale: base estándar → tablas en `reports/01_datos/` y gráficas HTML.
   - Listo cuando: las tablas y gráficas se generan con una sola corrida y yo las reviso.
