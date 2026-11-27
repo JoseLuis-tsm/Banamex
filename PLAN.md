@@ -165,7 +165,7 @@ Objetivo: cohortes limpias, validadas y entendidas, con el contrato de datos apr
   - Hace: cuentas por vintage, estrategia y segmento; participación de productos y canales; distribución de score y edad por familia; filas por MOB.
   - Entra → sale: base estándar → tablas en `reports/01_datos/` y gráficas HTML.
   - Listo cuando: las tablas y gráficas se generan con una sola corrida y yo las reviso.
-- [ ] **`04_madurez_y_curvas.py`**
+- [x] **`04_madurez_y_curvas.py`**
   - Hace: función de madurez a H = 6 (`src/data/cohorts.py`), con comprobación de las 27 vintages (202401–202603); curvas de la tasa de Over30 por MOB por vintage y estrategia; **proporción de cohortes con `OVER30ACCTS > ENRACCTS` en MOB = 6**; construye los conjuntos de modelado.
   - Entra → sale: base estándar → `data/processed/s1_dataset.csv` (línea en MOB = 0, todas las vintages), `data/processed/s3_dataset.csv` (tasa en MOB = 6, solo cohortes maduras) y reportes.
   - Listo cuando: ambos datasets están generados y, si la proporción de `OVER30ACCTS > ENRACCTS` es alta, queda una propuesta escrita sobre el denominador de S3 para que yo decida.
