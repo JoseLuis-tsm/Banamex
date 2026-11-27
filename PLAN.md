@@ -241,10 +241,11 @@ Objetivo: S4 con intervalos, reglas de consistencia y explicaciones en tres nive
 
 **3B. Consistencia**
 
-- [ ] **`05_reglas_consistencia.py`**
+- [x] **`05_reglas_consistencia.py`**
   - Hace: módulo determinista (`src/consistency/`) que corre después de los modelos: calcula S2 en lugar de predecirlo; recorta las tasas al rango 0–1; marca como *no evaluable* un perfil fuera del dominio de entrenamiento; baja la confianza cuando el soporte histórico es escaso (Alta con 1,000 o más cuentas maduras en perfiles similares, Media de 200 a 999, Baja con menos de 200); emite alerta cuando el riesgo es Crítico; agrega a cada fila las versiones de modelo y de datos. Calcula los **umbrales de riesgo** (percentiles 50, 80 y 95 de la tasa histórica ponderada) y los guarda en el `metadata.json` de S3.
   - Entra → sale: modelos y datasets → `src/consistency/`, umbrales en `metadata.json`.
   - Listo cuando: **las reglas se cumplen en el 100% de las filas de prueba** y hay pruebas por regla. Antes de implementar, **propónme por escrito** cómo defines "perfil fuera del dominio" y "perfiles similares" y espera mi respuesta.
+    *Decisión:* fuera del dominio = la combinación (familia, segmento, producto, canal) no aparece en el entrenamiento del modelo; perfiles similares = misma familia, segmento, producto, canal y edad, con cualquier score. Los umbrales de riesgo se conservan de la Fase 2 (tasa **predicha** en entrenamiento, no la histórica observada): desviación aprobada y documentada en `docs/consistencia_fase3.md`.
 
 **3C. Explicabilidad (SHAP)**
 
