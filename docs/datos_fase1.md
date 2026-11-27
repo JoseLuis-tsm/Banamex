@@ -59,7 +59,7 @@ Consecuencia: `ACCOUNTS` es el número de cuentas colocadas y no cambia con el M
 - **Hallazgo:**
   - El diccionario describe ambas columnas como "de las cuentas que se fueron a Over30". Sin embargo, en las 356,290 filas con `OVER30ACCTS = 0`, el 49.78% tiene `REVENUE > 0` y el 100% tiene `EXPENSES_TOTAL > 0`. Como `OVER30ACCTS` es acumulado, esas filas no tienen ninguna cuenta en Over30.
   - Además, `EXPENSES_TOTAL` es exactamente `ACQ + VAR + FIX` en el 100% de las filas, y la descripción de esos tres componentes no los limita a Over30.
-- **Decisión (Luis):** no se reinterpreta. Se conserva la definición del diccionario y la discrepancia queda registrada como observación: puede ser una excepción o un caso extraordinario de los datos. No afecta S1 ni S3; si más adelante se usan ingresos o gastos, se vuelve a revisar.
+- **Decisión (Luis):** el diccionario es la fuente de verdad y es exacto al 100%. `REVENUE` y `EXPENSES_TOTAL` son **de las cuentas que se fueron a Over30**. La discrepancia es una limitación de la base sintética, no de la definición. Los documentos del RAG y las respuestas del agente usan la definición del diccionario. No afecta S1 ni S3; si más adelante se usan ingresos o gastos, se calculan con esa definición.
 
 ## 7. Denominador de S3 (pregunta abierta 4)
 
@@ -105,7 +105,7 @@ Consecuencia: `ACCOUNTS` es el número de cuentas colocadas y no cambia con el M
 ## 11. Decisiones tomadas en la revisión
 
 1. `valor_nulo` queda como regla bloqueante (§4).
-2. `REVENUE` y `EXPENSES_TOTAL` conservan la definición del diccionario; la discrepancia solo se documenta (§6).
+2. El diccionario es la fuente de verdad (exacto al 100%). Cuando la base sintética no lo refleja, manda el diccionario. `REVENUE` y `EXPENSES_TOTAL` son de las cuentas en Over30, y la discrepancia de la base sintética solo se documenta (§6).
 3. S4 compara r.Reca champ y DARIA 1.6 solo en el **soporte común**. Los perfiles sin cuentas en ambas estrategias, como Costco y Beyond, salen como "sin evidencia". Ya está en PLAN.md, Fase 3, `01_ventana_aleatoria.py`.
 4. Escala del score, `GCLAMTS` en MOB 1 y cohortes pequeñas de S3 (§8, §9, §10): se sigue el plan tal como está, sin cambios. Si aparecen problemas en la Fase 2, se regresa a esta fase.
 5. Ningún dato se descarta de la base. `data/processed/base_estandar.csv` conserva las 1,089,833 filas, y los conjuntos de modelado son subconjuntos derivados.

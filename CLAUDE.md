@@ -299,7 +299,8 @@ Estos comandos además están **bloqueados técnicamente** en `.claude/settings.
 - Python 3.10 con pip, UTF-8; solo las librerías del plan; todo local; Docker es opcional.
 - Luis: datos, modelos, SHAP, evidencia y RAG. Ernesto: el agente.
 - Un valor nulo en cualquier columna del contrato es falla bloqueante (no se rellena ni se descarta en silencio).
-- `REVENUE` y `EXPENSES_TOTAL` conservan la definición del diccionario; la discrepancia observada con los datos queda documentada en `docs/datos_fase1.md`, sin reinterpretarla.
+- **El diccionario de datos es la fuente de verdad (exacto al 100%).** Si la base sintética no lo refleja, manda el diccionario: el código, los documentos del RAG y las respuestas del agente usan sus definiciones, y nada debe depender de un comportamiento de la base sintética que el diccionario no garantice (los datos reales seguirán el diccionario).
+- Por eso `REVENUE` y `EXPENSES_TOTAL` son **de las cuentas que se fueron a Over30**, como dice el diccionario; la discrepancia de la base sintética queda documentada en `docs/datos_fase1.md`.
 - S4 compara estrategias solo en el **soporte común** (perfiles con cuentas en ambas); fuera de él, "sin evidencia".
 - Ningún dato se descarta de la base: los conjuntos de modelado son subconjuntos derivados y la base completa queda disponible (incluido el RAG).
 
