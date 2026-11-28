@@ -14,7 +14,7 @@
 | 0b. Reestructura | Scripts en vez de notebooks, README, bloqueo de git, contratos y ejemplos simulados | L | ✅ |
 | 1. Datos | Cargar, validar y entender la base | L | ✅ |
 | 2. Modelos S1, S2 y S3 | Líneas base y XGBoost, métricas y versionado | L | ✅ |
-| 3. Estrategia, consistencia y explicabilidad | S4, reglas de consistencia, SHAP y factores de S1 | L | ✅ hecha · falta la revisión general de Luis |
+| 3. Estrategia, consistencia y explicabilidad | S4, reglas de consistencia, SHAP y factores de S1 | L | ✅ |
 | 4. App y API | FastAPI + Streamlit | L+E | ⬜ |
 | 5A. Evidencia y RAG | Funciones deterministas C1–C7 y base documental | L | ⬜ |
 | 5B. Agente | Intención, redacción, barrera numérica, chat y evaluación | E | En curso, con ejemplos simulados |
@@ -90,7 +90,7 @@ Métricas y criterios en [docs/fichas/ficha_s1.md](docs/fichas/ficha_s1.md) y [f
 - [x] **`01_s1_linea_base.py`** — media ponderada por producto × score y GLM Gamma.
 - [x] **`02_s1_xgboost.py`** — XGBoost sobre el log de la línea, con Optuna.
   - *Resultado:* MAE de prueba 2.9% **peor** que la base simple; no cumple el criterio (≥ 10% mejor).
-  - *Decisión de Luis (opción A):* se publica la **línea base simple** como S1. El XGBoost queda guardado como registro (`s1-4eeb609786`).
+  - *Decisión de Luis (opción A):* se publica la **línea base simple** como S1. El XGBoost (`s1-4eeb609786`) se conserva como respaldo de emergencia: si hiciera falta, se activa apuntando `models/s1/actual.json` a `s1-4eeb609786` (el cargador lee los dos tipos). Su binario no va a git; se regenera con `02_s1_xgboost.py`.
 - [x] **`03_s2_monto_total.py`** — S2 = cuentas planeadas × S1 (`src/models/s2.py`), exacto.
 - [x] **`04_s3_linea_base.py`** — tasa por score × producto y GLM binomial, con métricas ponderadas.
 - [x] **`05_s3_xgboost.py`** — XGBoost con etiqueta fraccional, monótono decreciente en el score y calibración Platt en validación.
@@ -141,7 +141,7 @@ Decisiones de S4 y consistencia en [docs/consistencia_fase3.md](docs/consistenci
 > - **Cómo se explica S1:** como el S1 publicado es una tabla producto × score, su explicación es exacta. Línea = promedio global × factor del producto × factor del score dentro del producto (`src/explain/s1_factors.py`).
 
 - [x] Gráficas de S1 revisadas por Luis.
-- [ ] **Revisión general de Luis** de S4, consistencia y explicabilidad, para cerrar la fase.
+- [x] **Revisión general de Luis** de S4, consistencia y explicabilidad: aprobada; fase cerrada.
 
 ---
 

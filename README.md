@@ -28,7 +28,7 @@ Cada resultado se explica (SHAP en S3; factores exactos en S1) y se podrá consu
 | 0 y 0b. Preparación | Repo, entorno, scripts, contratos y ejemplos simulados | ✅ |
 | 1. Datos | Base validada y datasets de S1 y S3 | ✅ |
 | 2. Modelos S1, S2 y S3 | S1 (línea base simple) y S3 (XGBoost) publicados; S2 como cálculo | ✅ |
-| 3. Estrategia, consistencia y explicabilidad | S4, reglas de consistencia, SHAP de S3 y factores de S1 | ✅ hecha · falta la revisión general de Luis |
+| 3. Estrategia, consistencia y explicabilidad | S4, reglas de consistencia, SHAP de S3 y factores de S1 | ✅ |
 | 4. App y API | FastAPI + Streamlit | ⬜ |
 | 5A. Evidencia y RAG | Funciones de evidencia C1–C7 y base documental | ⬜ |
 | 5B. Agente (Ernesto) | Clasificador, redacción, barrera numérica, chat | En curso, con ejemplos simulados |
@@ -158,6 +158,7 @@ data/raw/base_cards_sintetica.csv
 | Busco… | Está en |
 |---|---|
 | El modelo publicado de S1 o S3 | `models/<s1 o s3>/actual.json` dice qué versión está vigente. El modelo es `models/<salida>/<versión>/modelo.*` con su `metadata.json`. |
+| El respaldo de S1 | `models/s1/s1-4eeb609786/`: el XGBoost de S1, no publicado. Se activa apuntando `models/s1/actual.json` a esa versión. |
 | Métricas y explicación de un modelo | [docs/fichas/ficha_s1.md](docs/fichas/ficha_s1.md), [ficha_s3.md](docs/fichas/ficha_s3.md) |
 | Hallazgos y decisiones de datos | [docs/datos_fase1.md](docs/datos_fase1.md) |
 | Decisiones de S4 y de consistencia | [docs/consistencia_fase3.md](docs/consistencia_fase3.md) |
