@@ -5,7 +5,8 @@ Definiciones aprobadas (Fase 3, ver docs/consistencia_fase3.md):
   no aparece en los datos con que se entrenó ese modelo. La edad y el score pueden variar.
 - Perfiles similares (confianza): misma familia, segmento, producto, canal y edad, con
   cualquier score; se suman las cuentas (ACCOUNTS) de las cohortes maduras a 6 meses.
-  Alta con 1,000 o más, Media de 200 a 999, Baja con menos de 200.
+  Alta con 1,000 o más, Media de 200 a 999, Baja con menos de 200. La confianza acompaña
+  a la tasa de impago: en las estrategias no evaluables en riesgo (DARIA 2.0) es "No aplica".
 - Umbrales de riesgo: los del metadata.json de S3 (percentiles de la tasa predicha en
   entrenamiento; desviación documentada respecto de la propuesta).
 
@@ -26,6 +27,7 @@ SIMILAR_COLUMNS: List[str] = DOMAIN_COLUMNS + ["AGE_TAG"]
 CONFIDENCE_HIGH = 1000
 CONFIDENCE_MEDIUM = 200
 CONFIDENCE_LEVELS = ["Alta", "Media", "Baja"]
+CONFIDENCE_NOT_APPLICABLE = "No aplica"
 
 STATUS_OK = "evaluable"
 STATUS_NOT_RISK = "no evaluable en riesgo"
@@ -128,7 +130,9 @@ def apply_rules(
 
     accounts = similar_accounts(out, similar_table)
     out["cuentas_similares"] = accounts
-    out["confianza"] = confidence_level(accounts)
+    # La confianza acompaña a la tasa: sin desempeño de riesgo (DARIA 2.0) es "No aplica";
+    # las cuentas similares se conservan como dato informativo.
+    out["confianza"] = np.where(risk_ok_strategy, confidence_level(accounts), CONFIDENCE_NOT_APPLICABLE)
 
     status, reason = [], []
     for ok_strategy, in1, in3, strategy in zip(risk_ok_strategy, s1_in, s3_in, out["STRATEGY"]):
@@ -159,17 +163,19 @@ def check_rules(out: pd.DataFrame, rate: np.ndarray, line: np.ndarray, threshold
     has_line = out["linea_promedio"].notna()
     planned = out["cuentas_planeadas"].notna() & has_line
     expected_level = pd.Series(np.where(risk, risk_level(np.nan_to_num(out["tasa_impago"].to_numpy()), thresholds), None))
+    not_risk = out["STRATEGY"].isin(cat.NOT_RISK_EVALUABLE)
+    expected_confidence = pd.Series(np.where(not_risk, CONFIDENCE_NOT_APPLICABLE, confidence_level(out["cuentas_similares"])))
     checks = {
         "S2 = cuentas planeadas × S1": (planned, np.isclose(out["monto_total"], out["cuentas_planeadas"] * out["linea_promedio"], rtol=1e-12)),
         "tasa en [0, 1]": (risk, out["tasa_impago"].between(0, 1)),
         "tasa = S3 recortada": (risk, np.isclose(out["tasa_impago"], np.clip(raw_rate, 0, 1))),
         "línea = S1 dentro del dominio": (has_line, np.isclose(out["linea_promedio"], np.asarray(line, dtype=float))),
-        "no evaluable en riesgo sin tasa": (out["STRATEGY"].isin(cat.NOT_RISK_EVALUABLE), ~risk),
+        "no evaluable en riesgo sin tasa": (not_risk, ~risk),
         "fuera de dominio sin la salida del modelo": (out["estado"].isin([STATUS_OUT_S1, STATUS_OUT_S3]), ~risk),
         "evaluable con tasa y línea": (ok, risk & has_line),
         "nivel de riesgo según umbrales": (risk, out["nivel_riesgo"].eq(expected_level)),
         "alerta si y solo si Crítico": (pd.Series(True, index=out.index), out["alerta"].ne("").eq(out["nivel_riesgo"].eq(CRITICAL))),
-        "confianza según cuentas similares": (pd.Series(True, index=out.index), out["confianza"].eq(pd.Series(confidence_level(out["cuentas_similares"])))),
+        "confianza según cuentas similares": (pd.Series(True, index=out.index), out["confianza"].eq(expected_confidence)),
         "estado no evaluable lleva motivo": (~ok, out["motivo"].ne("")),
         "versiones presentes": (pd.Series(True, index=out.index),
                                 out[["modelo_s1", "modelo_s3", "datos_sha256", "horizonte_mob"]].notna().all(axis=1)),

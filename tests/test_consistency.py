@@ -61,6 +61,8 @@ def test_daria_2_no_es_evaluable_en_riesgo(training):
     out = _run(tr, [_p(strategy="DARIA 2.0", seg="LE Thin", score="i.205+")], [5_000], [0.2])
     assert out.loc[0, "estado"] == STATUS_NOT_RISK and np.isnan(out.loc[0, "tasa_impago"]) and out.loc[0, "motivo"]
     assert out.loc[0, "linea_promedio"] == 5_000  # la línea sí se da: DARIA 2.0 tiene MOB 0
+    # Sin tasa no hay confianza que reportar; las cuentas similares quedan como dato informativo.
+    assert out.loc[0, "confianza"] == "No aplica" and out.loc[0, "cuentas_similares"] > 0
 
 
 def test_fuera_de_dominio_no_recibe_la_salida(training):

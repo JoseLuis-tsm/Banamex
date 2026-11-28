@@ -260,8 +260,8 @@ Objetivo: S4 con intervalos, reglas de consistencia y explicaciones en tres nive
 **Listo cuando (fase):** criterios de S4, consistencia y SHAP cumplidos y revisados por mí.
 
 > **Pendiente de revisar antes de cerrar la Fase 3:**
-> - Revisar a ojo las gráficas nuevas de S1 (`shap_s1_global_barras.html`, `shap_s1_global_beeswarm.html`, `shap_s1_perfil_cascada.html`); en la cascada el eje se acotó para que se vean los factores.
-> - Decidir si DARIA 2.0 debe mostrar nivel de confianza (hoy sí, porque mide la historia de perfiles similares) o "no aplica", ya que no tiene tasa.
+> - ~~Revisar a ojo las gráficas nuevas de S1 (`shap_s1_global_barras.html`, `shap_s1_global_beeswarm.html`, `shap_s1_perfil_cascada.html`); en la cascada el eje se acotó para que se vean los factores.~~ Revisadas por Luis: se ven bien.
+> - ~~Decidir si DARIA 2.0 debe mostrar nivel de confianza o "no aplica", ya que no tiene tasa.~~ Decidido por Luis: "No aplica"; las cuentas similares se conservan como dato informativo (`src/consistency/rules.py`, `docs/consistencia_fase3.md`).
 > - Revisión general de Luis de los resultados de S4, consistencia y SHAP (`docs/consistencia_fase3.md`).
 
 ---

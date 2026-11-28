@@ -16,7 +16,8 @@ Decisiones aprobadas por Luis antes de implementar `scripts/03_estrategia_y_expl
 - **Conteo:** se suman las cuentas (`ACCOUNTS`) de las cohortes maduras a 6 meses.
 - **Niveles:** Alta con 1,000 cuentas o más, Media de 200 a 999 y Baja con menos de 200.
 - **Distribución sobre los perfiles distintos de las cohortes maduras:** 65.6% Alta, 19.7% Media y 14.7% Baja.
-- **Distribución sobre las filas de prueba de S1:** 59.9% Alta, 14.3% Media y 25.8% Baja. Hay más Baja porque estas filas incluyen DARIA 2.0 y vintages recientes, que tienen menos historia madura.
+- **DARIA 2.0: "No aplica"** (decisión de Luis). La confianza acompaña a la tasa de impago, y DARIA 2.0 no la tiene. Si se calculara, saldría de la historia madura de DARIA 1.6 en perfiles parecidos (Baja o Media, nunca Alta) y podría leerse como una confianza sobre una tasa que no se muestra. Las cuentas similares se conservan como dato informativo.
+- **Distribución sobre las filas de prueba de S1:** 11,525 Alta, 2,375 Media, 3,552 Baja y 1,783 No aplica (DARIA 2.0). Sin contar DARIA 2.0, son 66.0% Alta, 13.6% Media y 20.4% Baja. Hay más Baja que en las cohortes maduras porque estas filas incluyen vintages recientes, con menos historia madura.
 
 ## 3. Umbrales de riesgo: desviación de la propuesta
 
