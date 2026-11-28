@@ -2,10 +2,11 @@
 
 > Contexto permanente para Claude Code. Léelo completo al iniciar cada sesión.
 > - Plan de trabajo y avance: `PLAN.md`
-> - Guía de uso del repo (estructura, dónde poner datos, cómo correr): `README.md`
+> - Guía de uso del repo (instalación, scripts, dónde está cada cosa): `README.md`
 > - Propuesta original: `docs/Propuesta_Tecnica.pdf`
 > - Diccionario de variables: `data/contracts/diccionario_variables.csv`
 > - Contratos entre frentes: `docs/contratos/`
+> - Decisiones por fase, con su evidencia: `docs/datos_fase1.md`, `docs/fichas/`, `docs/consistencia_fase3.md`
 >
 > Si algo de este archivo contradice la propuesta, avísame antes de decidir por tu cuenta.
 
@@ -17,12 +18,12 @@ Una plataforma **local** que, para un perfil de adquisición de tarjetas de cré
 
 | Salida | Pregunta | Tipo |
 |---|---|---|
-| S1. Línea promedio esperada | ¿Qué límite promedio recibe una cuenta de este perfil? | Regresión (XGBoost) |
+| S1. Línea promedio esperada | ¿Qué límite promedio recibe una cuenta de este perfil? | Regresión. **Publicada: línea base simple** (producto × score), porque el XGBoost no cumplió el criterio |
 | S2. Monto total esperado | ¿Cuánto crédito implica colocar N cuentas? | Cálculo: cuentas planeadas × S1 (no se predice) |
-| S3. Tasa de impago esperada | ¿Qué fracción de cuentas estará en Over30 a 6 meses? | Tasa calibrada (XGBoost) |
+| S3. Tasa de impago esperada | ¿Qué fracción de cuentas estará en Over30 a 6 meses? | Tasa calibrada (XGBoost, publicado) |
 | S4. Estrategia sugerida | ¿Qué estrategia rinde mejor para este perfil? | Comparación de escenarios con intervalo |
 
-Cada resultado se explica con SHAP y se consulta en lenguaje natural con un asistente (RAG + Ollama) que **solo redacta sobre cifras ya calculadas**.
+Cada resultado se explica (SHAP en S3; descomposición exacta por factores en S1) y se consulta en lenguaje natural con un asistente (RAG + Ollama) que **solo redacta sobre cifras ya calculadas**.
 
 Los modelos se entrenan **una sola vez, fuera de línea**, con las vintages 202401 a 202609. La interfaz solo hace inferencia.
 
@@ -38,7 +39,7 @@ Dos personas trabajan **en paralelo** en el mismo repo:
 
 | Persona | Frente | Carpetas propias |
 |---|---|---|
-| **Luis** | Datos, modelos (S1, S2, S3, S4), consistencia, SHAP, evidencia determinista y RAG | `scripts/01_datos`, `02_modelos_prediccion`, `03_estrategia_y_explicabilidad`, `05a_evidencia_rag`; `src/data`, `features`, `models`, `strategy`, `consistency`, `explain`, `evidence`, `rag`; `data/knowledge`; `models/` |
+| **Luis** | Datos, modelos (S1, S2, S3, S4), consistencia, SHAP, evidencia determinista y RAG | `scripts/01_datos`, `02_modelos_prediccion`, `03_estrategia_y_explicabilidad`, `05a_evidencia_rag`; `src/data`, `features`, `models`, `strategy`, `consistency`, `explain`, `evidence`, `rag`; `data/contracts`, `mock`, `knowledge`; `models/` |
 | **Ernesto** | El agente: clasificador de intención, redacción, barrera numérica, flujo del chat y su evaluación | `scripts/05b_asistente`; `src/assistant`; `data/eval` |
 | **Ambos** | App y API, contratos, documentación y configuración | `api/`, `app/`, `scripts/04_app_api`, `docs/`, `README.md`, `CLAUDE.md`, `PLAN.md`, `requirements/`, `configs/`, `tests/` (los de contrato) |
 
@@ -46,16 +47,20 @@ Reglas del reparto:
 
 - **Al iniciar una sesión, si no sabes con quién hablas, pregunta** si es Luis o Ernesto, y trabaja solo en el frente de esa persona.
 - **No edites las carpetas propias de la otra persona.** Si tu tarea lo necesita, propón el cambio y dime a quién hay que pedírselo.
-- Los dos frentes se hablan **solo por contratos** (`docs/contratos/`): el formato del paquete de evidencia y el del servicio de chat. Cambiar un contrato requiere que ambos estén de acuerdo; avísame antes de tocarlo.
+- **Cada persona decide sola dentro de su frente.** No mandes a revisión de la otra persona las decisiones de un frente. Se dividieron la carga para trabajar en paralelo, y lo que choque al unir los trabajos se resuelve en ese momento.
+- Los dos frentes se hablan **solo por contratos** (`docs/contratos/`): el formato del paquete de evidencia y el del servicio de chat. Si una decisión de tu frente cambia lo que el contrato describe, actualiza el contrato y avísame en una línea qué cambió.
 - Mientras la evidencia real no exista, el agente trabaja contra **ejemplos simulados** (`data/mock/`) servidos por `src/evidence/` con `evidence_mode = "mock"` en `configs/config.json`.
 
 ---
 
 ## 3. Estado y alcance actual
 
-- **Luis:** Fase 0b (reestructura) → Fase 1 (datos) → Fase 2 (modelos S1, S2 y S3).
-- **Ernesto:** Fase 5B (agente) contra los ejemplos simulados, en cuanto la Fase 0b esté terminada.
-- Todo lo demás (S4, SHAP, evidencia real, RAG, API, app, cierre) **no se empieza hasta que se indique explícitamente.**
+- **Luis:**
+  - Fases 0, 0b, 1 y 2 terminadas.
+  - Fase 3 (S4, consistencia y explicabilidad) hecha. Falta su revisión general para cerrarla.
+- **Ernesto:** Fase 5B (agente) en curso, contra los ejemplos simulados.
+- Las Fases 4 (API y app), 5A (evidencia real y RAG) y 6 (cierre) **no se empiezan hasta que se indique explícitamente.**
+- El estado detallado está en `PLAN.md` §1.
 
 ---
 
@@ -65,8 +70,10 @@ Reglas del reparto:
 2. **Solo las librerías del plan**, instaladas por capas desde `requirements/`:
    - `base.txt`: pandas, numpy, scikit-learn, plotly (+ herramientas mínimas de desarrollo: pytest).
    - `ml.txt`: lo anterior + xgboost, shap, optuna.
-   - `app.txt`: streamlit, fastapi, pydantic.
-   - `assistant.txt`: chromadb, ollama (el paquete de Python es solo el cliente; **Ollama es un programa aparte** que se instala en la máquina).
+   - `lock.txt`: versiones fijadas de base + ml que instalan desde Python 3.10; es lo que se instala normalmente.
+   - `app.txt` (se crea en la Fase 4): streamlit, fastapi, pydantic.
+   - `assistant.txt` (se crea en la Fase 5): chromadb, ollama (el paquete de Python es solo el cliente; **Ollama es un programa aparte** que se instala en la máquina).
+   - Al crear una capa nueva, sus versiones se agregan a `lock.txt`.
    - **Pandera no se usa.** Las validaciones se escriben con pandas puro.
    - **matplotlib no se usa.** Todas las gráficas son con Plotly, incluidas las de SHAP (se construyen con los valores SHAP).
    - Si hace falta una librería mínima que no está aquí (por ejemplo, un servidor para correr FastAPI), **pregúntame primero**.
@@ -96,7 +103,7 @@ Reglas del reparto:
 
 ### Nombres de columna
 
-El diccionario trae para cada variable un alias `dummiN` y un nombre real. Luis indicó que **los datos vienen con los alias `dummiN`**; el reporte de la Fase 0 decía que el CSV traía los nombres reales. **Verifícalo con el encabezado del CSV.** El cargador debe aceptar **ambos** y renombrar internamente a los **nombres reales**, imprimiendo cuál encontró.
+El diccionario trae para cada variable un alias `dummiN` y un nombre real. El CSV actual trae los **nombres reales**. El cargador (`src/data/load.py`) acepta **ambos**, renombra internamente a los **nombres reales** e imprime cuál encontró.
 
 | Nombre real | Alias | Grupo |
 |---|---|---|
@@ -123,16 +130,16 @@ El diccionario trae para cada variable un alias `dummiN` y un nombre real. Luis 
 | EXPENSES_ECM_FIX | dummi48 | Resultado |
 | EXPENSES_TOTAL | dummi49 | Resultado |
 
-`MOB` no tiene alias en el diccionario: busca una columna llamada `MOB` y, si no queda claro cuál es, pregúntame. El mapa nombre real ↔ alias se guarda en `data/contracts/column_map.json`.
+`MOB` no tiene alias en el diccionario: es la columna llamada `MOB`. El mapa nombre real ↔ alias se guarda en `data/contracts/column_map.json`.
 
 Las columnas de **resultado** solo construyen objetivos; **nunca son variables de entrada**.
 
 ### Qué significa cada columna (confirmado por Luis)
 
-- **`OVER30ACCTS` es acumulado:** cuenta las cuentas que llegaron a Over30 **hasta ese MOB**, no solo las de ese mes.
-- **`REVENUE` también es acumulado** (según Luis; confírmalo con los datos).
-- Para las demás columnas de resultado (`OVER30AMTS`, `GCLAMTS`, `NCLAMTS`, `RECOVERYAMTS`, `EXPENSES_*`) **comprueba con los datos** si son acumuladas o del mes (dentro de una cohorte, una serie acumulada nunca baja al subir el MOB) y documenta la evidencia.
-- Las descripciones de `REVENUE` y `EXPENSES_TOTAL` dicen "de las cuentas que se fueron a Over30", pero las de sus componentes de gasto no. Comprueba que `EXPENSES_TOTAL = EXPENSES_ACQ + EXPENSES_ECM_VAR + EXPENSES_ECM_FIX` se cumpla y documenta a qué población se refiere. Esto no afecta S1 ni S3.
+- **Acumuladas** (cuentan lo ocurrido **hasta ese MOB**, no solo en ese mes): `OVER30ACCTS`, `OVER30AMTS`, `GCLAMTS`, `NCLAMTS`, `RECOVERYAMTS` y `REVENUE`.
+- **Constantes en la cohorte:** `ACCOUNTS`, `CREDITLINESAMTS` y `EXPENSES_ECM_FIX`. **Del mes:** `ENRACCTS`, `ENRAMTS`, `EXPENSES_ECM_VAR` y `EXPENSES_TOTAL`. `EXPENSES_ACQ` solo existe en MOB = 0.
+- `REVENUE` y `EXPENSES_TOTAL` son **de las cuentas que se fueron a Over30**, como dice el diccionario. La base sintética no lo cumple, y la discrepancia está documentada. `EXPENSES_TOTAL = ACQ + VAR + FIX` sí se cumple. Nada de esto afecta S1 ni S3.
+- La evidencia de cada punto está en `docs/datos_fase1.md`.
 
 ### Estrategia según vintage
 
@@ -157,16 +164,19 @@ El validador devuelve un reporte legible: qué falló, en qué fila y qué hacer
 - *Bloquean la carga:* llave repetida; columna faltante; valor nulo en una columna del contrato; categoría fuera de catálogo; estrategia que no corresponde a su vintage; MOB mayor al posible para su vintage; valor fuera del rango del diccionario; `NCLAMTS ≠ GCLAMTS − RECOVERYAMTS`; `EXPENSES_TOTAL ≠ ACQ + VAR + FIX`; `EXPENSES_ACQ ≠ 0` con MOB ≠ 0. (Las igualdades se comparan con una tolerancia numérica pequeña.)
 - *Solo avisan:* `OVER30ACCTS > ENRACCTS`; una columna acumulada (`OVER30ACCTS`, `REVENUE`) que baja al subir el MOB dentro de una cohorte; columnas no declaradas en el diccionario (se descartan).
 
-**Detalle del diccionario:** algunos valores de catálogo traen un espacio al final (por ejemplo `"Brands-NonPayroll-OffUs&LE "`, `"AAC Off Us Non-Payroll "`). Compara contra los datos y normaliza con `.str.strip()` si procede, documentando la decisión.
+**Detalle del diccionario:** dos valores de catálogo traen un espacio al final (`"Brands-NonPayroll-OffUs&LE "` y `"AAC Off Us Non-Payroll "`), y los datos también. Al cargar se aplica `.str.strip()` a todas las dimensiones, y `src/data/catalog.py` guarda los valores sin espacios.
 
 ---
 
 ## 6. Definición de las salidas
 
-- **S1:** objetivo = `CREDITLINESAMTS / ACCOUNTS` en **MOB = 0** (la línea que se asigna al booking). XGBoost sobre el **logaritmo** de la línea, con peso = `ACCOUNTS`. Líneas base: media ponderada por producto y score; GLM Gamma.
+- **S1:** objetivo = `CREDITLINESAMTS / ACCOUNTS` en **MOB = 0** (la línea que se asigna al booking). XGBoost sobre el **logaritmo** de la línea, con peso = `ACCOUNTS`. Líneas base: media ponderada por producto y score; GLM Gamma. **Publicado:** la media ponderada por producto × score, porque el XGBoost quedó 2.9% peor en MAE de prueba (decisión de Luis). Se explica con su descomposición exacta: promedio global × factor del producto × factor del score dentro del producto.
 - **S2:** `S2 = cuentas planeadas × S1`. Función determinista, no modelo.
-- **S3:** objetivo = `OVER30ACCTS / ENRACCTS` en **MOB = H = 6**, como etiqueta fraccional con peso = `ENRACCTS`, efecto **decreciente** del score (restricción monótona) y calibración para que la tasa predicha coincida con la observada. Líneas base: tasa ponderada por score y producto; GLM binomial. Como `OVER30ACCTS` es acumulado, S3 es la **tasa acumulada de Over30 a 6 meses**. Verifica en la Fase 1 en qué proporción de cohortes `OVER30ACCTS > ENRACCTS` en MOB = 6 (el numerador es acumulado y el denominador es el saldo vigente); si es frecuente, **propón y pregúntame** usar `ACCOUNTS` como denominador.
-- **S4:** (Fase 3) comparación de escenarios; se llama *sugerida*, no *óptima*. Solo con la ventana de asignación aleatoria, y solo se sugiere si el intervalo excluye cero y los dos métodos coinciden en el signo; si no, "Sin diferencia concluyente".
+- **S3:** objetivo = `OVER30ACCTS / ENRACCTS` en **MOB = H = 6**, como etiqueta fraccional con peso = `ENRACCTS`, efecto **decreciente** del score (restricción monótona) y calibración para que la tasa predicha coincida con la observada. Líneas base: tasa ponderada por score y producto; GLM binomial. Como `OVER30ACCTS` es acumulado, S3 es la **tasa acumulada de Over30 a 6 meses**. `OVER30ACCTS > ENRACCTS` no ocurre en ninguna cohorte, así que el denominador es `ENRACCTS`. Se explica con SHAP en escala logit, sobre la salida **sin calibrar**.
+- **S4:** comparación de escenarios; se llama *sugerida*, no *óptima*. Solo con la ventana de asignación aleatoria (r.Reca champ contra DARIA 1.6) y solo en el soporte común.
+  - **Método 1:** diferencia observada con intervalo bootstrap.
+  - **Método 2:** tasa predicha por S3 de las cohortes reales de cada estrategia, dejando fuera una vintage a la vez.
+  - Se sugiere solo si el intervalo del método 1 excluye cero y los dos métodos coinciden en el signo; si no, "Sin diferencia concluyente".
 
 ---
 
@@ -191,12 +201,16 @@ DARIA aparece solo en validación y prueba, así que esa parte mide extrapolaci�
 | Salida | Métricas | Criterio en prueba |
 |---|---|---|
 | S1 | MAE, MAPE, R² y sesgo, ponderados | MAE al menos 10% menor que el de la línea base simple |
-| S3 | AUC, KS, Gini, log loss y Brier ponderados; calibración por deciles | No peor que el GLM; razón observado/predicho entre 0.95 y 1.05; tasa observada creciente por nivel de riesgo |
+| S3 | AUC, KS, Gini, log loss y Brier ponderados; calibración por deciles | No peor que el GLM en log loss y AUC; razón observado/predicho entre 0.95 y 1.05; tasa observada creciente por nivel de riesgo |
 | S4 | Signo y ancho del intervalo; concordancia entre métodos | Mismo signo en al menos 70% de los perfiles con diferencia concluyente |
 
 Para AUC y calibración, cada fila aporta tantos eventos como cuentas en Over30 y tantos no eventos como cuentas expuestas restantes. S3 también se reporta por rango de edad.
 
-**Niveles de riesgo** (percentiles de la tasa histórica ponderada): Bajo hasta P50; Medio P50–P80; Alto P80–P95; Crítico sobre P95. **Confianza** según cuentas maduras en perfiles similares: Alta con 1,000 o más, Media de 200 a 999, Baja con menos de 200.
+**Niveles de riesgo:** Bajo hasta P50; Medio P50–P80; Alto P80–P95; Crítico sobre P95. Los percentiles son de la **tasa predicha calibrada en entrenamiento**, ponderada por `ENRACCTS`, y están guardados en el `metadata.json` de S3. La propuesta pedía la tasa histórica observada; es una desviación aprobada, porque el 35% de las cohortes tiene tasa observada 0.
+
+**Confianza** según las cuentas maduras en perfiles similares (misma familia, segmento, producto, canal y edad): Alta con 1,000 o más, Media de 200 a 999 y Baja con menos de 200. En DARIA 2.0 es "No aplica", porque no tiene tasa.
+
+**Fuera de dominio:** un perfil cuya combinación (familia, segmento, producto, canal) no aparece en el entrenamiento de un modelo no recibe la salida de ese modelo, y sale con estado y motivo.
 
 **Versionado:** cada modelo se guarda con un `metadata.json`: fecha, vintages usadas, variables, hiperparámetros, métricas, **versión de datos (hash SHA-256 del CSV)**, umbrales de riesgo y versiones de librerías.
 
@@ -207,10 +221,10 @@ Para AUC y calibración, cada fila aporta tantos eventos como cuentas en Over30 
 ```
 ├── CLAUDE.md  PLAN.md  README.md
 ├── configs/config.json            # semilla, H, particiones, rutas, evidence_mode, Ollama, Chroma
-├── requirements/                  # base.txt, ml.txt, app.txt, assistant.txt, lock.txt
+├── requirements/                  # base.txt, ml.txt, lock.txt (app.txt y assistant.txt en Fases 4 y 5)
 ├── data/
 │   ├── raw/                       # base_cards_sintetica.csv (NO git)
-│   ├── contracts/                 # diccionario, column_map.json, reglas de validación (sí git)
+│   ├── contracts/                 # diccionario y column_map.json (sí git)
 │   ├── processed/                 # tablas derivadas en CSV (NO git)
 │   ├── mock/                      # paquetes de evidencia de ejemplo (sí git)
 │   ├── knowledge/                 # documentos base del RAG, en markdown (sí git)
@@ -226,7 +240,7 @@ Para AUC y calibración, cada fila aporta tantos eventos como cuentas en Over30 
 ├── models/                        # <salida>/<versión>/{modelo.*, metadata.json} y actual.json
 ├── reports/                       # tablas y gráficas generadas por los scripts (NO git)
 ├── api/  app/                     # FastAPI y Streamlit
-├── docs/                          # propuesta, contratos/, fichas de modelo, manuales
+├── docs/                          # propuesta, contratos/, fichas/, decisiones por fase, manuales
 ├── scratch/                       # pruebas personales: scratch/luis/, scratch/ernesto/ (NO git)
 └── tests/
 ```
@@ -292,25 +306,33 @@ Estos comandos además están **bloqueados técnicamente** en `.claude/settings.
 
 ## 12. Decisiones confirmadas y preguntas abiertas
 
-**Confirmadas**
-- Los datos están en `data/raw/base_cards_sintetica.csv`.
-- `OVER30ACCTS` y `REVENUE` son acumulados. En el diccionario, "en el mes de información de performance MOB" significa *observado al corte de ese MOB* (acumulado hasta ese MOB), no *solo lo ocurrido en ese mes*. Por eso S3 se lee directamente en MOB = 6.
-- El pipeline es de scripts `.py`; no hay notebooks.
-- Python 3.10 con pip, UTF-8; solo las librerías del plan; todo local; Docker es opcional.
-- Luis: datos, modelos, SHAP, evidencia y RAG. Ernesto: el agente.
-- Un valor nulo en cualquier columna del contrato es falla bloqueante (no se rellena ni se descarta en silencio).
-- **El diccionario de datos es la fuente de verdad (exacto al 100%).** Si la base sintética no lo refleja, manda el diccionario: el código, los documentos del RAG y las respuestas del agente usan sus definiciones, y nada debe depender de un comportamiento de la base sintética que el diccionario no garantice (los datos reales seguirán el diccionario).
-- Por eso `REVENUE` y `EXPENSES_TOTAL` son **de las cuentas que se fueron a Over30**, como dice el diccionario; la discrepancia de la base sintética queda documentada en `docs/datos_fase1.md`.
-- S4 compara estrategias solo en el **soporte común** (perfiles con cuentas en ambas); fuera de él, "sin evidencia".
+Cada decisión tiene su evidencia en el documento que se indica.
+
+**Proyecto**
+- El pipeline es de scripts `.py`; no hay notebooks. Python 3.10 con pip y UTF-8; solo las librerías del plan; todo local; Docker es opcional.
+- Luis: datos, modelos, consistencia, explicabilidad, evidencia y RAG. Ernesto: el agente. Cada uno decide dentro de su frente (§2).
+
+**Datos** (`docs/datos_fase1.md`)
+- **El diccionario de datos es la fuente de verdad (exacto al 100%).** Si la base sintética no lo refleja, manda el diccionario: el código, los documentos del RAG y las respuestas del agente usan sus definiciones. Nada debe depender de un comportamiento de la base sintética que el diccionario no garantice, porque los datos reales seguirán el diccionario.
+- "En el mes de información de performance MOB" significa *observado al corte de ese MOB* (acumulado hasta ese MOB). Por eso S3 se lee directamente en MOB = 6.
+- El CSV trae nombres reales y `MOB` se llama `MOB`. Las columnas acumuladas, constantes y del mes están en §5.
+- Un valor nulo en cualquier columna del contrato es falla bloqueante: no se rellena ni se descarta en silencio.
 - Ningún dato se descarta de la base: los conjuntos de modelado son subconjuntos derivados y la base completa queda disponible (incluido el RAG).
+- El denominador de S3 es `ENRACCTS`: `OVER30ACCTS > ENRACCTS` ocurre en 0 de 52,835 cohortes.
 
-**Resueltas con los datos (Fase 1; detalle en `docs/datos_fase1.md`)**
-1. El CSV trae los nombres reales (el cargador acepta también los alias `dummiN`).
-2. `MOB` es la columna llamada `MOB`.
-3. Acumuladas: `OVER30ACCTS`, `OVER30AMTS`, `GCLAMTS`, `NCLAMTS`, `RECOVERYAMTS` y `REVENUE`.
-4. `OVER30ACCTS > ENRACCTS` en MOB = 6 en 0 de 52,835 cohortes: se mantiene `ENRACCTS` como denominador de S3.
+**Modelos** (`docs/fichas/`)
+- S1 publicado = línea base simple (producto × score), porque el XGBoost no cumplió el criterio. El XGBoost queda guardado como registro.
+- S3 publicado = XGBoost con calibración Platt. Los umbrales de riesgo son percentiles de la tasa predicha en entrenamiento (desviación aprobada, §7).
 
-**Por decidir en la Fase 5** (se preguntan al llegar): embeddings de Chroma local y definición exacta de "perfil fuera de dominio" y de "perfiles similares" para la confianza.
+**Estrategia y consistencia** (`docs/consistencia_fase3.md`)
+- S4 compara r.Reca champ contra DARIA 1.6 solo en el **soporte común**; fuera de él, "Sin evidencia". DARIA 2.0: "No evaluable en riesgo".
+- Método 2 de S4: S3 reentrenado dejando fuera una vintage a la vez, para no inflar la concordancia.
+- "Fuera de dominio", "perfiles similares" y la confianza "No aplica" de DARIA 2.0 están definidos en §7.
+
+**Explicabilidad**
+- S3 se explica con el TreeSHAP nativo de XGBoost (`pred_contribs`), porque shap 0.49.1 no lee XGBoost 3.x; es el mismo algoritmo. S1 se explica con su descomposición exacta por factores.
+
+**Por decidir en la Fase 5** (se preguntan al llegar): el modelo de embeddings local de Chroma.
 
 ---
 
