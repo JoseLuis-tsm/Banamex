@@ -72,7 +72,7 @@ Cada función devuelve un diccionario (JSON) con **exactamente** estos campos:
 
 - **Tasas y diferencias de tasas** se guardan como fracción entre 0 y 1 (`0.087`). En el texto pueden aparecer como porcentaje o puntos porcentuales, multiplicadas por 100 y con un decimal (`8.7%`, `1.4 puntos porcentuales`).
 - **Montos** en pesos; **conteos** como enteros. En el texto pueden llevar separador de miles (`41,250,000`).
-- Los niveles (`nivel_riesgo`: Bajo, Medio, Alto, Crítico; `confianza`: Alta, Media, Baja) son texto.
+- Los niveles (`nivel_riesgo`: Bajo, Medio, Alto, Crítico; `confianza`: Alta, Media, Baja o No aplica) son texto. `confianza` es "No aplica" en las estrategias sin desempeño de riesgo (DARIA 2.0).
 - Algunos **nombres de catálogo contienen números** (`DARIA 1.6`, `15.Recalibration 2.0`, `141-150`, `02| Young 25-30`). Esos números son parte del nombre, no cifras: la barrera debe reconocerlos (por ejemplo, quitando del texto los nombres que vienen en `cifras`, `tablas` o `parametros` antes de extraer números).
 
 ### Regla para el agente

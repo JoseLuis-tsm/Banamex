@@ -27,7 +27,7 @@ def get_path(config: Dict[str, Any], key: str) -> Path:
     """Devuelve como ruta absoluta una entrada de config["paths"].
 
     Las rutas del JSON son relativas a la raíz del repo, así funcionan igual
-    desde un notebook, desde pytest o desde la API, sin importar la carpeta actual.
+    desde un script, desde pytest o desde la API, sin importar la carpeta actual.
 
     Parámetros:
         config: configuración cargada con load_config().
