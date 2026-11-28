@@ -12,7 +12,9 @@ import platform
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
 
 LIBRARIES = ["numpy", "pandas", "scikit-learn", "xgboost", "optuna", "shap", "plotly"]
 
@@ -89,3 +91,9 @@ def current(models_dir: Path, output: str) -> Optional[Tuple[Path, Dict[str, Any
         return None
     d = Path(models_dir) / read_json(pointer)["ruta"]
     return d, read_json(d / "metadata.json")
+
+
+def vintage_list(frame: pd.DataFrame, split: Optional[str] = None) -> List[int]:
+    """Vintages (enteros, ordenados) de un conjunto de la partición, o de todo el frame si split es None."""
+    part = frame if split is None else frame[frame["CONJUNTO"] == split]
+    return sorted(int(v) for v in part["VINTAGE"].unique())

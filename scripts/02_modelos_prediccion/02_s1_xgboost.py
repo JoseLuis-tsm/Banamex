@@ -154,11 +154,6 @@ def compute(config: dict, n_trials: int) -> dict:
 
 
 # ===== 3. Guardado =====
-def vintage_list(frame: pd.DataFrame, split: str = None) -> list:
-    part = frame if split is None else frame[frame["CONJUNTO"] == split]
-    return sorted(int(v) for v in part["VINTAGE"].unique())
-
-
 def save_results(results: dict, config: dict) -> list:
     """Guarda reportes, modelos y metadata; publica solo si cumple el criterio."""
     reports = get_path(config, "reports_dir") / "02_modelos_prediccion"
@@ -188,8 +183,8 @@ def save_results(results: dict, config: dict) -> list:
         "peso": "ACCOUNTS",
         "variables": feature_columns(),
         "vintages": {
-            "entrenamiento": vintage_list(frame, TRAIN), "validacion": vintage_list(frame, VALIDATION),
-            "prueba": vintage_list(frame, TEST), "modelo_final": vintage_list(frame),
+            "entrenamiento": registry.vintage_list(frame, TRAIN), "validacion": registry.vintage_list(frame, VALIDATION),
+            "prueba": registry.vintage_list(frame, TEST), "modelo_final": registry.vintage_list(frame),
         },
         "hiperparametros": hyper,
         "rondas": results["rounds"],
@@ -259,8 +254,8 @@ def publish_baseline(results: dict, config: dict, data_hash: str, xgb_version: s
         "variables": ["PRODUCT", "SCORE_TAG"],
         "niveles_respaldo": levels,
         "vintages": {
-            "entrenamiento": vintage_list(frame, TRAIN), "validacion": vintage_list(frame, VALIDATION),
-            "prueba": vintage_list(frame, TEST), "modelo_final": vintage_list(frame),
+            "entrenamiento": registry.vintage_list(frame, TRAIN), "validacion": registry.vintage_list(frame, VALIDATION),
+            "prueba": registry.vintage_list(frame, TEST), "modelo_final": registry.vintage_list(frame),
         },
         "metricas": {
             "validacion": block(VALIDATION, "Total").get("Total"),

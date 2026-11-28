@@ -86,13 +86,20 @@ Hallazgos y decisiones en [docs/datos_fase1.md](docs/datos_fase1.md).
 
 Métricas y criterios en [docs/fichas/ficha_s1.md](docs/fichas/ficha_s1.md) y [ficha_s3.md](docs/fichas/ficha_s3.md).
 
+**Modelos de reserva (decisión de Luis):** los GLM de S1 y S3 se guardan como reserva de emergencia. Los principales siguen siendo los publicados.
+- Se guardan en JSON con `src/models/glm.py`: solo el intercepto y los coeficientes.
+- Para activar uno, se apunta `models/<salida>/actual.json` a su versión, o se carga con `load_s1(models_dir, versión)` / `load_s3(...)`.
+- La explicabilidad de la Fase 3 está hecha para los modelos publicados y no aplica a las reservas.
+
 - [x] **`00_variables_y_particion.py`** — variables de entrada (`src/features/engineering.py`), partición temporal por vintage y prueba automática de fuga.
 - [x] **`01_s1_linea_base.py`** — media ponderada por producto × score y GLM Gamma.
+  - *Reserva:* el GLM Gamma queda guardado como modelo de reserva de S1 (`s1-767020790c`), sin publicar.
 - [x] **`02_s1_xgboost.py`** — XGBoost sobre el log de la línea, con Optuna.
   - *Resultado:* MAE de prueba 2.9% **peor** que la base simple; no cumple el criterio (≥ 10% mejor).
-  - *Decisión de Luis (opción A):* se publica la **línea base simple** como S1. El XGBoost (`s1-4eeb609786`) se conserva como respaldo de emergencia: si hiciera falta, se activa apuntando `models/s1/actual.json` a `s1-4eeb609786` (el cargador lee los dos tipos). Su binario no va a git; se regenera con `02_s1_xgboost.py`.
+  - *Decisión de Luis (opción A):* se publica la **línea base simple** como S1. El XGBoost queda guardado como registro (`s1-4eeb609786`).
 - [x] **`03_s2_monto_total.py`** — S2 = cuentas planeadas × S1 (`src/models/s2.py`), exacto.
 - [x] **`04_s3_linea_base.py`** — tasa por score × producto y GLM binomial, con métricas ponderadas.
+  - *Reserva:* el GLM binomial queda guardado como modelo de reserva de S3 (`s3-f8f7c31415`), sin publicar y con sus propios umbrales de riesgo.
 - [x] **`05_s3_xgboost.py`** — XGBoost con etiqueta fraccional, monótono decreciente en el score y calibración Platt en validación.
   - *Resultado:* aprobado y publicado (`s3-e212982330`).
   - *Umbrales de riesgo:* percentiles de la tasa predicha en entrenamiento, guardados en su `metadata.json`.

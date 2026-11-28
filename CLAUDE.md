@@ -321,8 +321,9 @@ Cada decisión tiene su evidencia en el documento que se indica.
 - El denominador de S3 es `ENRACCTS`: `OVER30ACCTS > ENRACCTS` ocurre en 0 de 52,835 cohortes.
 
 **Modelos** (`docs/fichas/`)
-- S1 publicado = línea base simple (producto × score), porque el XGBoost no cumplió el criterio. El XGBoost (`s1-4eeb609786`) se conserva como respaldo de emergencia: si hiciera falta, se activa apuntando `models/s1/actual.json` a `s1-4eeb609786` (el cargador lee los dos tipos). Su binario no va a git; se regenera con `02_s1_xgboost.py`.
+- S1 publicado = línea base simple (producto × score), porque el XGBoost no cumplió el criterio. El XGBoost queda guardado como registro.
 - S3 publicado = XGBoost con calibración Platt. Los umbrales de riesgo son percentiles de la tasa predicha en entrenamiento (desviación aprobada, §7).
+- **Reservas:** los GLM de S1 (Gamma) y S3 (binomial) se guardan como modelos de reserva de emergencia: `rol: "reserva"` en su `metadata.json`, sin publicar. Los principales son los publicados; una reserva se activa apuntando `actual.json` a su versión.
 
 **Estrategia y consistencia** (`docs/consistencia_fase3.md`)
 - S4 compara r.Reca champ contra DARIA 1.6 solo en el **soporte común**; fuera de él, "Sin evidencia". DARIA 2.0: "No evaluable en riesgo".

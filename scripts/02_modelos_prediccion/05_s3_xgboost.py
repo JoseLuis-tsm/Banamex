@@ -237,11 +237,6 @@ def compute(config: dict, n_trials: int) -> dict:
 
 
 # ===== 3. Guardado =====
-def vintage_list(frame: pd.DataFrame, split: str = None) -> list:
-    part = frame if split is None else frame[frame["CONJUNTO"] == split]
-    return sorted(int(v) for v in part["VINTAGE"].unique())
-
-
 def save_results(results: dict, config: dict) -> list:
     """Guarda reportes, modelos y metadata; publica solo si cumple los criterios."""
     reports = get_path(config, "reports_dir") / "02_modelos_prediccion"
@@ -278,8 +273,8 @@ def save_results(results: dict, config: dict) -> list:
         "variables": feature_columns(),
         "restriccion_monotona": {"variable": SCORE_FEATURE, "sentido": "decreciente", "violaciones_en_prueba": results["violations"]},
         "vintages": {
-            "entrenamiento": vintage_list(frame, TRAIN), "validacion": vintage_list(frame, VALIDATION),
-            "prueba": vintage_list(frame, TEST), "modelo_final": vintage_list(frame),
+            "entrenamiento": registry.vintage_list(frame, TRAIN), "validacion": registry.vintage_list(frame, VALIDATION),
+            "prueba": registry.vintage_list(frame, TEST), "modelo_final": registry.vintage_list(frame),
         },
         "hiperparametros": hyper,
         "rondas": results["rounds"],

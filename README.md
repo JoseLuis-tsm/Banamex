@@ -142,7 +142,7 @@ data/raw/base_cards_sintetica.csv
 | `utils/` | `load_config`, `get_path`, `set_seed` y el estilo común de gráficas | Todos |
 | `data/` | Carga, catálogo del diccionario, validación del contrato y madurez de cohortes | Fase 1 y siguientes |
 | `features/` | Variables de entrada y partición temporal | Fases 2 y 3 |
-| `models/` | Líneas base, métricas, búsqueda con Optuna, predicción, S2 y registro de versiones | Fases 2 y 3 |
+| `models/` | Líneas base, GLM de reserva, métricas, búsqueda con Optuna, predicción, S2 y registro de versiones | Fases 2 y 3 |
 | `strategy/` | Balance entre estrategias y S4 (bootstrap, método 2, regla de decisión) | Fases 1 y 3 |
 | `consistency/` | Reglas que corren después de los modelos: dominio, confianza, niveles y alertas | Fase 3 y la API |
 | `explain/` | SHAP de S3, factores de S1, frases de lectura y gráficas | Fase 3 y la evidencia |
@@ -158,7 +158,7 @@ data/raw/base_cards_sintetica.csv
 | Busco… | Está en |
 |---|---|
 | El modelo publicado de S1 o S3 | `models/<s1 o s3>/actual.json` dice qué versión está vigente. El modelo es `models/<salida>/<versión>/modelo.*` con su `metadata.json`. |
-| El respaldo de S1 | `models/s1/s1-4eeb609786/`: el XGBoost de S1, no publicado. Se activa apuntando `models/s1/actual.json` a esa versión. |
+| Los modelos de reserva | Los GLM de S1 (`models/s1/s1-767020790c/`) y S3 (`models/s3/s3-f8f7c31415/`), no publicados. Para usar uno, apunta `models/<salida>/actual.json` a su versión. Su `metadata.json` dice `"rol": "reserva"`. |
 | Métricas y explicación de un modelo | [docs/fichas/ficha_s1.md](docs/fichas/ficha_s1.md), [ficha_s3.md](docs/fichas/ficha_s3.md) |
 | Hallazgos y decisiones de datos | [docs/datos_fase1.md](docs/datos_fase1.md) |
 | Decisiones de S4 y de consistencia | [docs/consistencia_fase3.md](docs/consistencia_fase3.md) |
@@ -229,10 +229,10 @@ Todos se corren desde la raíz. Las salidas sin ruta van en `reports/<fase>/`, y
 | Script | Qué hace | Escribe |
 |---|---|---|
 | `00_variables_y_particion.py` | Variables de entrada, partición temporal por vintage y prueba de fuga | `data/processed/s1_modelado.csv`, `s3_modelado.csv`, `particion.csv` |
-| `01_s1_linea_base.py` | Líneas base de S1: media por producto × score y GLM Gamma | `s1_linea_base_*.csv` |
+| `01_s1_linea_base.py` | Líneas base de S1: media por producto × score y GLM Gamma; guarda el GLM como reserva | `s1_linea_base_*.csv`, `models/s1/` (reserva) |
 | `02_s1_xgboost.py` | XGBoost de S1; se publica solo si su MAE de prueba es ≥ 10% menor que el de la base. No lo fue, así que el script guarda el XGBoost como registro y publica la base simple como S1 | `models/s1/`, `s1_*.csv` y gráficas |
 | `03_s2_monto_total.py` | S2 = cuentas planeadas × S1, con comprobación exacta | `s2_monto_total.csv` |
-| `04_s3_linea_base.py` | Líneas base de S3: tasa por score × producto y GLM binomial | `s3_linea_base_*.csv` |
+| `04_s3_linea_base.py` | Líneas base de S3: tasa por score × producto y GLM binomial; guarda el GLM como reserva | `s3_linea_base_*.csv`, `models/s3/` (reserva) |
 | `05_s3_xgboost.py` | XGBoost de S3 (monótono en el score, Optuna, calibración Platt); publica si cumple los criterios | `models/s3/`, `s3_*.csv` y gráficas |
 | `06_resumen_modelos.py` | Tabla resumen y fichas de S1 y S3, generadas desde `metadata.json` | `resumen_modelos.csv`, `docs/fichas/` |
 
